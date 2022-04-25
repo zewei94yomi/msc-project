@@ -34,8 +34,15 @@ Orders can be generated before the program/simulation starts or generated gradua
 
 Orders should be generated according to population density or randomly.
 
+### Restaurant
 
+There is no data for every restaurant's location in San Francisco, therefore orders' start location (i.e. Restaurant):
+1. Generate restaurants clusters based on population density
+2. Random
 
+### Customer
+
+The order destinations or customer locations should be generated based on population density
 
 
 # 3. Data
