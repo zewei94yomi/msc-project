@@ -1,8 +1,8 @@
 # 1. Overview
 
-- Order Generator is used to simulate the process of drone food delivery.
+- Order Generator is used to simulate the process of generating new food delivery orders.
 
-- Order Generator will automatically generate food delivery orders based on population density (PD) in fixed areas. Areas with high PD are more likely to generate food delivery orders, while areas with low PD are less likely to generate food delivery orders.
+- Order Generator will automatically generate food delivery orders based on population density (PD) on a map. Areas with high PD are more likely to generate food delivery orders, while areas with low PD are less likely to generate food delivery orders.
 
 - According to OOP's principles, Order Generator will only generate orders. 
 
@@ -67,3 +67,8 @@ Orders should be generated according to population density or randomly.
 - Start (Coordinate)
 
 - End (Coordinate)
+
+## c. Density
+Population density
+
+- TODO
