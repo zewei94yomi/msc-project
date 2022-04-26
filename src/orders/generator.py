@@ -1,6 +1,6 @@
 from commons.coordinate import Coordinate
+from commons.map import Map
 from orders.order import Order
-import random
 
 
 class Generator:
@@ -8,51 +8,33 @@ class Generator:
     Order Generator
     """
     
-    def __init__(self, area: list, population_density=None):
-        self.topLeft = area[0]
-        self.topRight = area[1]
-        self.bottomLeft = area[2]
-        self.bottomRight = area[3]
-        self.population_density = population_density
-        self.use_density = population_density is not None
+    def __init__(self, map: Map):
+        self.map = map
     
-    def generate_random_order(self):
+    def generate_order(self, use_density=False):
         """
-        Generate an orders on the map, orders are randomly distributed
-        :return: a random Order instance
-        """
-        start = self.generate_random_coord()
-        end = self.generate_random_coord()
-        return Order(start=start, end=end)
+        Generate an orders on the given map
         
-    def generate_random_coord(self):
+        :return: a Order instance
         """
-        Generate a random coordinate on the map
-        :return: a random Coordinate instance
-        """
-        longitude = self.bottomLeft.longitude \
-                    + random.random() * (self.bottomRight.longitude - self.bottomLeft.longitude)
-        latitude = self.bottomLeft.latitude \
-                   + random.random() * (self.topLeft.latitude - self.bottomLeft.latitude)
-        return Coordinate(longitude=longitude, latitude=latitude)
-    
+        if use_density is False:
+            start = self.map.generate_random_coord()
+            end = self.map.generate_random_coord()
+            return Order(start=start, end=end)
+        else:
+            # TODO: generate orders using population density (end location)
+            pass
+        
     def __str__(self):
-        return f"Generator: " \
-               f"topLeft={self.topLeft}, topRight={self.topRight}, " \
-               f"bottomLeft={self.bottomLeft}, bottomRight={self.bottomRight}" \
-               f"use_density={self.use_density}"
+        return f"Generator(map={self.map})"
 
 
 if __name__ == '__main__':
-    area = list()
-    area.append(Coordinate(0, 100))
-    area.append(Coordinate(100, 100))
-    area.append(Coordinate(0, 0))
-    area.append(Coordinate(100, 0))
+    map = Map(Coordinate(0, 100), Coordinate(100, 100), Coordinate(0, 0), Coordinate(100, 0))
     
-    g = Generator(area)
+    g = Generator(map)
     orders = []
     for i in range(10):
-        orders.append(g.generate_random_order())
+        orders.append(g.generate_order())
     for order in orders:
         print(order)

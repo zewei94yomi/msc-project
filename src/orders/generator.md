@@ -37,45 +37,23 @@ Orders should be generated according to population density or randomly.
 ### Restaurant
 
 There is no data for every restaurant's location in San Francisco, therefore orders' start location (i.e. Restaurant):
-1. Generate restaurants clusters based on population density
+1. Generate restaurants clusters based on population density (Based on an assumption that the number of restaurants has 
+   positive relation with the population density)
 2. Random
 
 ### Customer
 
 The order destinations or customer locations should be generated based on population density
 
+# 3. Field
 
-# 3. Data
+- map: Map
 
-## a. Map/Area
+# 4. API
 
-- Boundary
-  - Top left (Coordinate)
-  - Top right (Coordinate)
-  - Bottom left (Coordinate)
-  - Bottom right (Coordinate)
-- `TODO`: Population density 
-
-
-
-## c. Coordinate
-
-- Longitude
-- Latitude
-
-
-
-## b. Order
-
-- uid
-
-- Time
-
-- Start (Coordinate)
-
-- End (Coordinate)
-
-## c. Density
-Population density
-
-- TODO
+```python
+generate_order(self, use_density=False)
+```
+Generate an `Order` on the given map. The order is randomly generatede if 
+the argument `use_density` is `False`, or the order is generated based on 
+population density if `use_density` is `True`
