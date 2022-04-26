@@ -1,8 +1,10 @@
 from commons.coordinate import Coordinate
+from commons.auto_str import auto_str
 from commons.map import Map
 from orders.order import Order
 
 
+@auto_str
 class Generator:
     """
     Order Generator
@@ -24,17 +26,15 @@ class Generator:
         else:
             # TODO: generate orders using population density (end location)
             pass
-        
-    def __str__(self):
-        return f"Generator(map={self.map})"
 
 
 if __name__ == '__main__':
     map = Map(Coordinate(0, 100), Coordinate(100, 100), Coordinate(0, 0), Coordinate(100, 0))
     
     g = Generator(map)
-    orders = []
-    for i in range(10):
-        orders.append(g.generate_order())
-    for order in orders:
-        print(order)
+    print(g)
+    # orders = []
+    # for i in range(10):
+    #     orders.append(g.generate_order())
+    # for order in orders:
+    #     print(order)

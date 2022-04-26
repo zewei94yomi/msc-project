@@ -1,24 +1,25 @@
 # Data
 
-## 1. Map/Area
+## 1. Map
 
 - Boundary
   - Top left (Coordinate)
   - Top right (Coordinate)
   - Bottom left (Coordinate)
   - Bottom right (Coordinate)
-- `TODO`: Population density 
+  - Population density
+  
+
+## 2. `TODO`: Population density 
 
 
-
-## 2. Coordinate
+## 3. Coordinate
 
 - Longitude
 - Latitude
 
 
-
-## 3. Order
+## 4. Order
 
 - uid
 
@@ -27,8 +28,3 @@
 - Start (Coordinate)
 
 - End (Coordinate)
-
-## 4. Density
-Population density
-
-- TODO
