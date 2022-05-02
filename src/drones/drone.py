@@ -6,16 +6,17 @@ import uuid
 
 @auto_str
 class Drone:
-    def __init__(self, warehouses: list, start: Coordinate, height: float, order: Order = None):
+    def __init__(self, warehouses: list, start_location: Coordinate, height: float):
         self.uuid = uuid.uuid4()
         self.warehouses = warehouses
-        self.current_location = start
+        self.current_location = start_location
         self.height = height    # meter
-        self.is_free = order is None
-        self.order = order
+        self.is_free = True
+        self.order = None
         
     def accept_order(self, order: Order):
-        pass
+        self.is_free = False
+        self.order = order
     
     def deliver(self):
         pass
@@ -29,8 +30,8 @@ class Drone:
     def recharge(self):
         pass
         
-    
-if __name__ == '__main__':
-    start = Coordinate(23, 44)
-    drone = Drone(warehouses=list(), start=start, height=123)
-    print(drone)
+#
+# if __name__ == '__main__':
+#     start_location = Coordinate(23, 44)
+#     drone = Drone(warehouses=list(), start_location=start_location, height=123)
+#     print(drone)
