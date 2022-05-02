@@ -44,8 +44,8 @@ Customers' locations (i.e. order destinations) should be generated based on popu
 
 1. Generate order
    ```python
-   generate_order(self, use_density=False)
+   get_order(self, use_density=False)
    ```
    Generate an `Order` on the given map. The order will be randomly generated if 
    the argument `use_density` is `False`, otherwise the order is generated based on 
-   population density
+   population density. 
