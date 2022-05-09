@@ -3,6 +3,7 @@ from typing import List
 from commons.auto_str import auto_str
 from drones.drone import Drone
 from commons.my_util import get_uuid
+import copy
 
 
 @auto_str
@@ -12,6 +13,7 @@ class DroneGenerator:
     def __init__(self, warehouses: List[Coordinate]):
         self.warehouses = warehouses
         self.warehouse_pointer = 0
+        self.ids = 1
     
     def get_drone(self) -> Drone:
         """
@@ -24,11 +26,14 @@ class DroneGenerator:
         
         :return: a new Drone instance
         """
-        drone = Drone(uuid=get_uuid(), warehouses=self.warehouses, start_location=self.warehouses[self.warehouse_pointer], height=0)
+        start_location = copy.deepcopy(self.warehouses[self.warehouse_pointer])
+        drone = Drone(uuid=self.ids, warehouses=self.warehouses,
+                      start_location=start_location, height=0)
+        self.ids += 1
         self.warehouse_pointer = (self.warehouse_pointer + 1) % len(self.warehouses)
         return drone
-    
-    
+
+
 if __name__ == '__main__':
     w = [Coordinate(longitude=123, latitude=22)]
     dg = DroneGenerator(warehouses=w)

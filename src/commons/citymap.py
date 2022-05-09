@@ -3,7 +3,7 @@ import random
 from commons.auto_str import auto_str
 
 
-@auto_str
+# @auto_str
 class Coordinate:
     """
     Coordinate of a location on maps.
@@ -11,14 +11,17 @@ class Coordinate:
     
     def __init__(self, longitude: float, latitude: float):
         self.longitude = longitude  # 经度
-        self.latitude = latitude    # 纬度
-    
+        self.latitude = latitude  # 纬度
+        
     def __eq__(self, other):
-        return math.isclose(self.longitude, other.longitude, rel_tol=0, abs_tol=0.0001) and \
-               math.isclose(self.latitude, other.latitude, rel_tol=0, abs_tol=0.0001)
+        return math.isclose(self.longitude, other.longitude, rel_tol=0, abs_tol=0.00001) and \
+               math.isclose(self.latitude, other.latitude, rel_tol=0, abs_tol=0.00001)
     
     def __sub__(self, other):
         return self.longitude - other.longitude, self.latitude - other.latitude
+
+    def __str__(self):
+        return f"[lo={round(self.longitude, 4)}, la={round(self.latitude, 4)}]"
 
 
 @auto_str
