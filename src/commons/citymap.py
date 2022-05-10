@@ -12,14 +12,14 @@ class Coordinate:
     def __init__(self, longitude: float, latitude: float):
         self.longitude = longitude  # 经度
         self.latitude = latitude  # 纬度
-        
+    
     def __eq__(self, other):
         return math.isclose(self.longitude, other.longitude, rel_tol=0, abs_tol=0.00001) and \
                math.isclose(self.latitude, other.latitude, rel_tol=0, abs_tol=0.00001)
     
     def __sub__(self, other):
         return self.longitude - other.longitude, self.latitude - other.latitude
-
+    
     def __str__(self):
         return f"[lo={round(self.longitude, 4)}, la={round(self.latitude, 4)}]"
 
@@ -44,11 +44,9 @@ class CityMap:
         Generate a random coordinate on the given map
         :return: a random Coordinate instance
         """
-        longitude = self.bottomLeft.longitude \
-                    + random.random() * (self.bottomRight.longitude - self.bottomLeft.longitude)
-        latitude = self.bottomLeft.latitude \
-                   + random.random() * (self.topLeft.latitude - self.bottomLeft.latitude)
-        return Coordinate(longitude=longitude, latitude=latitude)
+        lo = self.bottomLeft.longitude + random.random() * (self.bottomRight.longitude - self.bottomLeft.longitude)
+        la = self.bottomLeft.latitude + random.random() * (self.topLeft.latitude - self.bottomLeft.latitude)
+        return Coordinate(longitude=round(lo, 5), latitude=round(la, 5))
 
 
 if __name__ == '__main__':

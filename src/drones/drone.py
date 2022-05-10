@@ -11,7 +11,8 @@ import numpy as np
 
 @auto_str
 class Drone:
-    def __init__(self, uuid, warehouses: List[Coordinate], start_location: Coordinate, height: float):
+    def __init__(self, drone_id, uuid, warehouses: List[Coordinate], start_location: Coordinate, height: float):
+        self.drone_id = drone_id                    # Drone's id within the program
         self.uuid = uuid                            # Unique ID
         self.warehouses = warehouses                # Locations of warehouse
         self.current_location = start_location      # Current location of the drone
@@ -20,7 +21,7 @@ class Drone:
         self.status = DroneStatus.WAITING           # Status of the drone
         self.lo_speed = 0                           # Current longitude speed
         self.la_speed = 0                           # Current latitude speed
-        self.MAX_SPEED = 0.01                          # Maximum straight-line speed
+        self.MAX_SPEED = 0.5                        # Maximum straight-line speed
         self.destination = None                     # Location of the next destination
     
     def accept(self, order: Order):
@@ -36,8 +37,8 @@ class Drone:
         self.destination = self.order.start_location
         self.update_speed()
         self.status = DroneStatus.COLLECTING
-        print(f"[{datetime.now()}] Drone '{self.uuid}' accepted Order '{self.order.uuid}'")
-        print(f"[{datetime.now()}] Drone '{self.uuid}' is heading to {self.destination} to pick up food")
+        print(f"[{datetime.now()}] Drone '{self.drone_id}' accepted Order '{self.order.order_id}'")
+        print(f"[{datetime.now()}] Drone '{self.drone_id}' is flying to {self.destination} to pick up food")
     
     def pickup(self):
         """
@@ -51,8 +52,8 @@ class Drone:
         self.destination = self.order.end_location
         self.update_speed()
         self.status = DroneStatus.DELIVERING
-        print(f"[{datetime.now()}] Drone '{self.uuid}' collected Order '{self.order.uuid}'")
-        print(f"[{datetime.now()}] Drone '{self.uuid}' is heading to {self.destination} to deliver food")
+        print(f"[{datetime.now()}] Drone '{self.drone_id}' collected Order '{self.order.order_id}'")
+        print(f"[{datetime.now()}] Drone '{self.drone_id}' is flying to {self.destination} to deliver food")
     
     def give_food(self):
         """
@@ -67,8 +68,8 @@ class Drone:
         self.destination = self.nearest_warehouse()
         self.update_speed()
         self.status = DroneStatus.RETURNING
-        print(f"[{datetime.now()}] Drone '{self.uuid}' delivered Order '{self.order.uuid}'")
-        print(f"[{datetime.now()}] Drone '{self.uuid}' is heading to {self.destination} to recharge")
+        print(f"[{datetime.now()}] Drone '{self.drone_id}' delivered Order '{self.order.order_id}'")
+        print(f"[{datetime.now()}] Drone '{self.drone_id}' is flying to {self.destination} to recharge")
     
     def recharge(self):
         """
@@ -83,8 +84,8 @@ class Drone:
         self.la_speed = 0
         self.order = None
         self.status = DroneStatus.WAITING
-        print(f"[{datetime.now()}] Drone '{self.uuid}' returned to the nearest warehouse and start to recharge")
-        print(f"[{datetime.now()}] Drone '{self.uuid}' is recharging and waiting for new orders")
+        print(f"[{datetime.now()}] Drone '{self.drone_id}' returned to the nearest warehouse and start to recharge")
+        print(f"[{datetime.now()}] Drone '{self.drone_id}' is recharging and waiting for new orders")
     
     def update(self):
         if self.status is DroneStatus.COLLECTING:
@@ -97,7 +98,7 @@ class Drone:
             if self.fly() is True:
                 self.recharge()
         else:
-            print(f"[{datetime.now()}] Drone '{self.uuid}' is waiting for new orders")
+            print(f"[{datetime.now()}] Drone '{self.drone_id}' is waiting for new orders")
     
     # TODO
     def produce_noise(self):
@@ -106,7 +107,7 @@ class Drone:
     def fly(self):
         """Fly to the current destination"""
         lo_delta, la_delta = self.current_location - self.destination
-        if lo_delta <= math.fabs(self.lo_speed) and la_delta <= math.fabs(self.la_speed):
+        if math.fabs(lo_delta) <= math.fabs(self.lo_speed) and math.fabs(la_delta) <= math.fabs(self.la_speed):
             self.current_location.latitude = self.destination.latitude
             self.current_location.longitude = self.destination.longitude
             return True
@@ -121,8 +122,8 @@ class Drone:
         if direct_distance == 0:
             self.lo_speed = self.la_speed = 0
         else:
-            self.lo_speed = lo_distance * self.MAX_SPEED / direct_distance
-            self.la_speed = la_distance * self.MAX_SPEED / direct_distance
+            self.la_speed = round(la_distance * self.MAX_SPEED / direct_distance, 7)
+            self.lo_speed = round(lo_distance * self.MAX_SPEED / direct_distance, 7)
 
     def nearest_warehouse(self) -> Coordinate:
         distances = []

@@ -13,7 +13,7 @@ class DroneGenerator:
     def __init__(self, warehouses: List[Coordinate]):
         self.warehouses = warehouses
         self.warehouse_pointer = 0
-        self.ids = 1
+        self.ids = 0
     
     def get_drone(self) -> Drone:
         """
@@ -26,10 +26,10 @@ class DroneGenerator:
         
         :return: a new Drone instance
         """
-        start_location = copy.deepcopy(self.warehouses[self.warehouse_pointer])
-        drone = Drone(uuid=self.ids, warehouses=self.warehouses,
-                      start_location=start_location, height=0)
         self.ids += 1
+        start_location = copy.deepcopy(self.warehouses[self.warehouse_pointer])
+        drone = Drone(drone_id=self.ids, uuid=get_uuid(), warehouses=self.warehouses,
+                      start_location=start_location, height=0)
         self.warehouse_pointer = (self.warehouse_pointer + 1) % len(self.warehouses)
         return drone
 
