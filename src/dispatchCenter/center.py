@@ -8,29 +8,30 @@ from drones.drone import Drone
 from orders.order import Order
 from orders.ordergenerator import OrderGenerator
 import numpy as np
-import matplotlib.pyplot as plt
 from typing import List
+from plotter.plotter import Plotter
 
 
 @auto_str
 class Center:
-    def __init__(self, warehouses: List[Coordinate], city_map: CityMap):
+    def __init__(self, warehouses: List[Coordinate], city_map: CityMap, num_orders, num_drones):
+        # Coordinates of all warehouses
         self.warehouses = warehouses
+        # The city map which contains the coordinates of four corners, and a population density map
         self.city_map = city_map
+        # Order generator which generates new orders
         self.order_generator = OrderGenerator(city_map=self.city_map)
+        # Drone generator which generates new (free) drones
         self.drone_generator = DroneGenerator(warehouses=self.warehouses)
-        self.waiting_orders = Queue()   # first come, first serve
+        # Queue for waiting orders: orders first come, first served
+        self.waiting_orders = Queue()
+        # List of free drones
         self.free_drones = list()
+        # List of delivering drones
         self.delivering_drones = list()
-        self.plot_delivering_drones_x = list()
-        self.plot_delivering_drones_y = list()
-        self.plot_warehouses_x = [x.longitude for x in self.warehouses]
-        self.plot_warehouses_y = [x.latitude for x in self.warehouses]
-        self.plot_orders_x = list()
-        self.plot_orders_y = list()
-        self.img = plt.imread("../commons/map.jpeg")
-        self.fig, self.ax = plt.subplots()
-        self.init_plot()
+        self.create_order(num_orders)
+        self.create_drones(num_drones)
+        self.plotter = Plotter(warehouses=self.warehouses)
     
     def add_drone(self, drone=None):
         if drone is None:
@@ -42,17 +43,14 @@ class Center:
             order = self.order_generator.get_order()
         self.waiting_orders.push(order)
     
-    def init(self, order_num, drone_num):
-        for i in range(order_num):
-            self.add_order()
-        for i in range(drone_num):
+    def create_drones(self, num):
+        for i in range(num):
             self.add_drone()
+    
+    def create_order(self, num):
+        for i in range(num):
+            self.add_order()
             
-    def init_plot(self):
-        plt.xlim(-10, 50)
-        plt.ylim(-10, 50)
-        plt.ion()
-
     def has_free_drone(self):
         return len(self.free_drones) > 0
     
@@ -72,41 +70,32 @@ class Center:
 
     def update_drones(self):
         # TODO: optimize
-        self.plot_delivering_drones_x.clear()
-        self.plot_delivering_drones_y.clear()
-        self.plot_orders_x.clear()
-        self.plot_orders_y.clear()
+        drone_x = []
+        drone_y = []
+        order_x = []
+        order_y = []
         for drone in self.delivering_drones:
             drone.update()
-            self.plot_delivering_drones_x.append(drone.current_location.longitude)
-            self.plot_delivering_drones_y.append(drone.current_location.latitude)
+            drone_x.append(drone.current_location.longitude)
+            drone_y.append(drone.current_location.latitude)
             if drone.order is not None:
-                self.plot_orders_x.append(drone.order.start_location.longitude)
-                self.plot_orders_x.append(drone.order.end_location.longitude)
-                self.plot_orders_y.append(drone.order.start_location.latitude)
-                self.plot_orders_y.append(drone.order.end_location.latitude)
+                order_x.append(drone.order.start_location.longitude)
+                order_x.append(drone.order.end_location.longitude)
+                order_y.append(drone.order.start_location.latitude)
+                order_y.append(drone.order.end_location.latitude)
             # Select and remove waiting drones who have completed their orders from the list of delivering drones
+            # TODO: the problem of suddenly missing order points might be caused by this part of code
             if drone.status is DroneStatus.WAITING:
                 self.delivering_drones.remove(drone)
-                # add waiting drones to the list of free drones
                 self.free_drones.append(drone)
+        self.plotter.update(drone_x, drone_y, order_x, order_y)
         
-    def plot(self):
-        # TODO: optimize and make the whole process more smooth
-        plt.cla()
-        self.ax.imshow(self.img, extent=[-10, 50, -10, 50])
-        plt.scatter(self.plot_warehouses_x, self.plot_warehouses_y, color='blue')
-        plt.scatter(self.plot_delivering_drones_x, self.plot_delivering_drones_y, color='red')
-        plt.scatter(self.plot_orders_x, self.plot_orders_y, color='green')
-        plt.draw()
-        plt.pause(0.0001)
-
     def run(self):
         while True:
             if self.has_new_order() or self.has_working_drone():
                 self.process()
                 self.update_drones()
-                self.plot()
+                self.plotter.plot()
             
     def nearest_free_drone(self, order: Order) -> Drone:
         distances = []
@@ -114,11 +103,4 @@ class Center:
             _, _, line_distance = distance(order.start_location, drone.current_location)
             distances.append(line_distance)
         return self.free_drones[np.argmin(distances)]
-
-
-if __name__ == '__main__':
-    t_city_map = CityMap(Coordinate(0, 40), Coordinate(40, 40), Coordinate(0, 0), Coordinate(40, 0))
-    center = Center(warehouses=[Coordinate(0, 40), Coordinate(40, 0)], city_map=t_city_map)
-    center.init(order_num=25, drone_num=8)
-    center.run()
 
