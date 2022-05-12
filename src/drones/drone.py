@@ -22,6 +22,7 @@ class Drone:
         self.lo_speed = 0                           # Current longitude speed
         self.la_speed = 0                           # Current latitude speed
         self.MAX_SPEED = 0.5                        # Maximum straight-line speed
+        # TODO: 未来可以重构这里，把destination变成一个list，那么路径就是destination里的一个个坐标点
         self.destination = None                     # Location of the next destination
     
     def accept(self, order: Order):
@@ -40,9 +41,9 @@ class Drone:
         print(f"[{datetime.now()}] Drone '{self.drone_id}' accepted Order '{self.order.order_id}'")
         print(f"[{datetime.now()}] Drone '{self.drone_id}' is flying to {self.destination} to pick up food")
     
-    def pickup(self):
+    def collect(self):
         """
-        Drone picks up the food at the start location of the order.
+        Drone collects the food at the start location of the order.
         
         Update the order's status from 'ACCEPTED' to 'DELIVERING'.
         Set a new destination for the drone and calculate speed based on the new destination.
@@ -91,7 +92,7 @@ class Drone:
         """Update drone's position and status based on its current status"""
         if self.status is DroneStatus.COLLECTING:
             if self.fly() is True:
-                self.pickup()
+                self.collect()
         elif self.status is DroneStatus.DELIVERING:
             if self.fly() is True:
                 self.give_food()

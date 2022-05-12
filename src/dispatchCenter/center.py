@@ -25,7 +25,7 @@ class Center:
         self.drone_generator = DroneGenerator(warehouses=self.warehouses)
         # Queue for waiting orders: orders first come, first served
         self.waiting_orders = Queue()
-        # List of all orders being delivered
+        # TODO: List of all orders being delivered
         self.delivering_orders = list()
         # List of free drones
         self.free_drones = list()
