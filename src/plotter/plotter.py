@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
 from typing import List
-from commons.citymap import Coordinate
+from cityMap.citymap import Coordinate
 
 
 class Plotter:
     def __init__(self, warehouses: List[Coordinate]):
-        self.img = plt.imread("commons/map.jpeg")
+        self.img = plt.imread("recourses/map.jpeg")
         self.fig, self.ax = plt.subplots()
         self.warehouses_x = [x.longitude for x in warehouses]
         self.warehouses_y = [x.latitude for x in warehouses]
@@ -30,8 +30,8 @@ class Plotter:
     def plot(self):
         plt.cla()
         self.ax.imshow(self.img, extent=[-10, 50, -10, 50])
-        plt.scatter(self.warehouses_x, self.warehouses_y, color='blue')
-        plt.scatter(self.drone_x, self.drone_y, color='red')
-        plt.scatter(self.order_x, self.order_y, color='green')
+        plt.scatter(self.warehouses_x, self.warehouses_y, color='blue', marker='p', linewidths=5)
+        plt.scatter(self.drone_x, self.drone_y, color='red', linewidths=0.5)
+        plt.scatter(self.order_x, self.order_y, color='green', marker='v', linewidths=1)
         plt.draw()
-        plt.pause(0.0001)
+        plt.pause(0.01)

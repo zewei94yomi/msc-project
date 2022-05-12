@@ -1,6 +1,6 @@
-from commons.citymap import Coordinate
+from cityMap.citymap import Coordinate
 from typing import List
-from commons.auto_str import auto_str
+from commons.decorators import auto_str
 from drones.drone import Drone
 from commons.my_util import get_uuid
 import copy
@@ -19,9 +19,8 @@ class DroneGenerator:
         """
         Create and initialize a Drone instance.
         
-        The drone will be initialized to a warehouse. The strategy for determining
-        which warehouse to be initialized in is Round Robin.
-        The drone will be initialized at 0 meters high.
+        The drone will be initialized to a warehouse. The strategy for determining which warehouse to be initialized
+        in is Round Robin.
         The warehouse pointer will increment by 1 when a new drone is generated.
         
         :return: a new Drone instance

@@ -1,17 +1,16 @@
 import math
 import random
-from commons.auto_str import auto_str
+from commons.decorators import auto_str
 
 
-# @auto_str
 class Coordinate:
     """
     Coordinate of a location on maps.
     """
     
     def __init__(self, longitude: float, latitude: float):
-        self.longitude = longitude  # 经度
-        self.latitude = latitude  # 纬度
+        self.longitude = longitude  # x
+        self.latitude = latitude    # y
     
     def __eq__(self, other):
         return math.isclose(self.longitude, other.longitude, rel_tol=0, abs_tol=0.00001) and \
@@ -30,16 +29,16 @@ class CityMap:
     
     def __init__(self, topLeft: Coordinate, topRight: Coordinate, bottomLeft: Coordinate, bottomRight: Coordinate,
                  population_density=None):
-        # Boundary of the city map
+        # Four corners of the city map, any coordinates will be generated within this square area
         self.topLeft = topLeft
         self.topRight = topRight
         self.bottomLeft = bottomLeft
         self.bottomRight = bottomRight
-        # Population density of the whole city map
+        # TODO: Population density of the whole city map
         self.population_density = population_density
-        # TODO: Grids
+        # TODO: Grids that grid the whole city map
     
-    def generate_random_coord(self):
+    def generate_random_coord(self) -> Coordinate:
         """
         Generate a random coordinate on the given map
         :return: a random Coordinate instance

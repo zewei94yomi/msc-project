@@ -1,4 +1,4 @@
-from commons.citymap import CityMap, Coordinate
+from cityMap.citymap import CityMap, Coordinate
 from dispatchCenter.center import Center
 
 if __name__ == '__main__':

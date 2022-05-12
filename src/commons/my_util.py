@@ -1,10 +1,11 @@
 import shortuuid
 import math
-from commons.citymap import Coordinate
+from cityMap.citymap import Coordinate
 import numpy as np
 
 
 def get_uuid():
+    """Create a unique numeric UID with a length of 8"""
     return shortuuid.ShortUUID(alphabet="0123456789").random(8)
 
 
@@ -58,4 +59,4 @@ def nearest_neighbor_idx(neighbors, target: Coordinate) -> int:
 
 
 if __name__ == '__main__':
-    print("Main test...")
+    print("My Util test...")

@@ -1,7 +1,7 @@
-from commons.citymap import Coordinate
+from cityMap.citymap import Coordinate
 from orders.order import Order
-from commons.auto_str import auto_str
-from commons.my_enum import DroneStatus
+from commons.decorators import auto_str
+from commons.enum import DroneStatus
 from commons.my_util import distance
 from datetime import datetime
 from typing import List
@@ -12,7 +12,7 @@ import numpy as np
 @auto_str
 class Drone:
     def __init__(self, drone_id, uuid, warehouses: List[Coordinate], start_location: Coordinate, height: float):
-        self.drone_id = drone_id                    # Drone's id within the program
+        self.drone_id = drone_id                    # Drone's id
         self.uuid = uuid                            # Unique ID
         self.warehouses = warehouses                # Locations of warehouse
         self.current_location = start_location      # Current location of the drone
@@ -88,6 +88,7 @@ class Drone:
         print(f"[{datetime.now()}] Drone '{self.drone_id}' is recharging and waiting for new orders")
     
     def update(self):
+        """Update drone's position and status based on its current status"""
         if self.status is DroneStatus.COLLECTING:
             if self.fly() is True:
                 self.pickup()
@@ -98,14 +99,19 @@ class Drone:
             if self.fly() is True:
                 self.recharge()
         else:
+            # Current status is DroneStatus.WAITING
             print(f"[{datetime.now()}] Drone '{self.drone_id}' is waiting for new orders")
     
     # TODO
     def produce_noise(self):
         pass
     
-    def fly(self):
-        """Fly to the current destination"""
+    def fly(self) -> bool:
+        """
+        Fly to the current destination
+        
+        If the drone reaches the destination after this fly update, return True; otherwise return False
+        """
         lo_delta, la_delta = self.current_location - self.destination
         if math.fabs(lo_delta) <= math.fabs(self.lo_speed) and math.fabs(la_delta) <= math.fabs(self.la_speed):
             self.current_location.latitude = self.destination.latitude
@@ -126,6 +132,7 @@ class Drone:
             self.lo_speed = round(lo_distance * self.MAX_SPEED / direct_distance, 7)
 
     def nearest_warehouse(self) -> Coordinate:
+        """Find the nearest warehouse"""
         distances = []
         for warehouse in self.warehouses:
             _, _, line_distance = distance(self.current_location, warehouse)

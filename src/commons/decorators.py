@@ -17,5 +17,6 @@ class Foo(object):
         
         
 if __name__ == '__main__':
+    print("Test '@auto_str' decorator...")
     test = Foo(1, 2)
     print(test)

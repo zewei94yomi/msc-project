@@ -1,6 +1,6 @@
-from commons.citymap import Coordinate
-from commons.auto_str import auto_str
-from commons.my_enum import OrderStatus
+from cityMap.citymap import Coordinate
+from commons.decorators import auto_str
+from commons.enum import OrderStatus
 from datetime import datetime
 
 
