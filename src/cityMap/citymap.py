@@ -34,7 +34,7 @@ class CityMap:
         self.topRight = topRight
         self.bottomLeft = bottomLeft
         self.bottomRight = bottomRight
-        # TODO: Population density of the whole city map
+        # TODO: Population density of the whole city map, 使用我找的人口密度图的网站！上面有位置坐标！
         self.population_density = population_density
         # TODO: Grids that grid the whole city map
     
