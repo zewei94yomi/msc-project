@@ -1,13 +1,10 @@
 from commons.decorators import auto_str
 from commons.enum import DroneStatus
-from commons.my_util import distance
+from commons.my_util import nearest_free_drone
 from commons.util import Queue
 from cityMap.citymap import Coordinate, CityMap
 from drones.dronegenerator import DroneGenerator
-from drones.drone import Drone
-from orders.order import Order
 from orders.ordergenerator import OrderGenerator
-import numpy as np
 from typing import List
 from plotter.plotter import Plotter
 
@@ -88,7 +85,7 @@ class Center:
         """
         while self.has_new_order() and self.has_free_drone():
             order = self.waiting_orders.pop()       # pop the least recent order
-            drone = self.nearest_free_drone(order)  # find the index of
+            drone = nearest_free_drone(order)       # find the index of
             drone.accept(order)                     # let the drone accept the order
             self.free_drones.remove(drone)          # remove the drone from the list of free drones
             self.delivering_drones.append(drone)    # add the drone to the list of delivering drones
@@ -101,7 +98,6 @@ class Center:
         Update drones and orders' status and positions.
         If any delivering drone completes its order, update its status and move it to the list of free drones.
         """
-        # temporary list for free drones
         free_drones = []
         for drone in self.delivering_drones:
             drone.update()
@@ -119,11 +115,3 @@ class Center:
                 self.process()
                 self.update_drones()
                 self.plotter.plot()
-            
-    def nearest_free_drone(self, order: Order) -> Drone:
-        """Find the nearest drone to the given order"""
-        distances = []
-        for drone in self.free_drones:
-            _, _, line_distance = distance(order.start_location, drone.current_location)
-            distances.append(line_distance)
-        return self.free_drones[np.argmin(distances)]

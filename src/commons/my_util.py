@@ -1,6 +1,9 @@
 import shortuuid
 import math
 from cityMap.citymap import Coordinate
+from drones.drone import Drone
+from orders.order import Order
+from typing import List
 import numpy as np
 
 
@@ -56,6 +59,20 @@ def nearest_neighbor_idx(neighbors, target: Coordinate) -> int:
         _, _, line_distance = distance(neighbor, target)
         distances.append(line_distance)
     return np.argmin(distances)
+
+
+def nearest_free_drone(order: Order, free_drones: List[Drone]) -> Drone:
+    """Find the nearest drone among free drones to a given order
+    
+    :param order: the target order
+    :param free_drones: all free drones that can chosen from
+    :return the nearest drone
+    """
+    distances = []
+    for drone in free_drones:
+        _, _, line_distance = distance(order.start_location, drone.current_location)
+        distances.append(line_distance)
+    return free_drones[np.argmin(distances)]
 
 
 if __name__ == '__main__':
