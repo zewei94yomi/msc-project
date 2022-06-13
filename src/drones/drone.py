@@ -21,7 +21,7 @@ class Drone:
         self.status = DroneStatus.WAITING           # Status of the drone
         self.lo_speed = 0                           # Current longitude speed
         self.la_speed = 0                           # Current latitude speed
-        self.MAX_SPEED = 0.5                        # Maximum straight-line speed
+        self.MAX_SPEED = 1                          # Maximum straight-line speed
         # TODO: 未来可以重构这里，把destination变成一个list，那么路径就是destination里的一个个坐标点
         self.destination = None                     # Location of the next destination
     

@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from typing import List
 from cityMap.citymap import Coordinate
+from drones.drone import Drone
 
 
 class Plotter:
@@ -17,21 +18,29 @@ class Plotter:
         plt.ylim(-10, 50)
         plt.ion()
     
-    def update(self, d_x, d_y, o_x, o_y):
+    def saveData(self, drone: Drone):
+        self.drone_x.append(drone.current_location.longitude)
+        self.drone_y.append(drone.current_location.latitude)
+        self.order_x.append(drone.order.start_location.longitude)
+        self.order_x.append(drone.order.end_location.longitude)
+        self.order_y.append(drone.order.start_location.latitude)
+        self.order_y.append(drone.order.end_location.latitude)
+
+    def clearData(self):
         self.drone_x.clear()
         self.drone_y.clear()
         self.order_x.clear()
         self.order_y.clear()
-        self.drone_x = d_x
-        self.drone_y = d_y
-        self.order_x = o_x
-        self.order_y = o_y
-        
+
     def plot(self):
         plt.cla()
         self.ax.imshow(self.img, extent=[-10, 50, -10, 50])
+        # plot warehouse
         plt.scatter(self.warehouses_x, self.warehouses_y, color='blue', marker='p', linewidths=5)
+        # plot drones
         plt.scatter(self.drone_x, self.drone_y, color='red', linewidths=0.5)
+        # plot orders
         plt.scatter(self.order_x, self.order_y, color='green', marker='v', linewidths=1)
-        plt.draw()
-        plt.pause(0.01)
+        # clear plotter cache
+        self.clearData()
+        plt.pause(0.0001)
