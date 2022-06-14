@@ -7,6 +7,7 @@ from drones.dronegenerator import DroneGenerator
 from orders.ordergenerator import OrderGenerator
 from typing import List
 from plotter.plotter import Plotter
+from noise.tracker import NoiseTracker
 
 
 @auto_str
@@ -29,6 +30,7 @@ class Center:
         self.create_order(num_orders)
         self.create_drones(num_drones)
         self.plotter = Plotter(warehouses=self.warehouses)
+        self.noise_tracker = NoiseTracker()
     
     def add_drone(self, drone=None):
         """
@@ -85,7 +87,7 @@ class Center:
         """
         while self.has_new_order() and self.has_free_drone():
             order = self.waiting_orders.pop()       # pop the least recent order
-            drone = nearest_free_drone(order)       # find the index of
+            drone = nearest_free_drone(order, self.free_drones)       # find the nearest free drone
             drone.accept(order)                     # let the drone accept the order
             self.free_drones.remove(drone)          # remove the drone from the list of free drones
             self.delivering_drones.append(drone)    # add the drone to the list of delivering drones
@@ -101,6 +103,7 @@ class Center:
         free_drones = []
         for drone in self.delivering_drones:
             drone.update()
+            self.noise_tracker.trackNoise(drone)
             if drone.status is DroneStatus.WAITING:
                 free_drones.append(drone)
             else:

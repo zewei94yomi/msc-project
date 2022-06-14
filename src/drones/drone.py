@@ -22,6 +22,7 @@ class Drone:
         self.lo_speed = 0                           # Current longitude speed
         self.la_speed = 0                           # Current latitude speed
         self.MAX_SPEED = 1                          # Maximum straight-line speed
+        self.NOISE = 1
         # TODO: 未来可以重构这里，把destination变成一个list，那么路径就是destination里的一个个坐标点
         self.destination = None                     # Location of the next destination
     
@@ -103,9 +104,8 @@ class Drone:
             # Current status is DroneStatus.WAITING
             print(f"[{datetime.now()}] Drone '{self.drone_id}' is waiting for new orders")
     
-    # TODO
     def produce_noise(self):
-        pass
+        return self.NOISE
     
     def fly(self) -> bool:
         """
