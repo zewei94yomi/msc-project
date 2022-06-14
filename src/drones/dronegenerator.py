@@ -34,7 +34,7 @@ class DroneGenerator:
 
 
 if __name__ == '__main__':
-    w = [Coordinate(longitude=123, latitude=22)]
+    w = [Coordinate(latitude=22, longitude=123)]
     dg = DroneGenerator(warehouses=w)
     print(dg)
     d = dg.get_drone()

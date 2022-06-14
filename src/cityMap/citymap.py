@@ -8,32 +8,31 @@ class Coordinate:
     Coordinate of a location on maps.
     """
     
-    def __init__(self, longitude: float, latitude: float):
-        self.longitude = longitude  # x
+    def __init__(self, latitude: float, longitude: float):
         self.latitude = latitude    # y
+        self.longitude = longitude  # x
     
     def __eq__(self, other):
-        return math.isclose(self.longitude, other.longitude, rel_tol=0, abs_tol=0.00001) and \
-               math.isclose(self.latitude, other.latitude, rel_tol=0, abs_tol=0.00001)
+        return math.isclose(self.latitude, other.latitude, rel_tol=0, abs_tol=0.00001) and \
+               math.isclose(self.longitude, other.longitude, rel_tol=0, abs_tol=0.00001)
     
     def __sub__(self, other):
-        return self.longitude - other.longitude, self.latitude - other.latitude
+        return self.latitude - other.latitude, self.longitude - other.longitude
     
     def __str__(self):
-        return f"[lo={round(self.longitude, 4)}, la={round(self.latitude, 4)}]"
+        return f"[la={round(self.latitude, 4)}, lo={round(self.longitude, 4)}]"
 
 
 @auto_str
 class CityMap:
     """ The city map of drones food delivery """
     
-    def __init__(self, topLeft: Coordinate, topRight: Coordinate, bottomLeft: Coordinate, bottomRight: Coordinate,
+    def __init__(self, left, right, bottom, top,
                  population_density=None):
-        # Four corners of the city map, any coordinates will be generated within this square area
-        self.topLeft = topLeft
-        self.topRight = topRight
-        self.bottomLeft = bottomLeft
-        self.bottomRight = bottomRight
+        self.left = left
+        self.right = right
+        self.bottom = bottom
+        self.top = top
         # TODO: Population density of the whole city map, 使用我找的人口密度图的网站！上面有位置坐标！
         self.population_density = population_density
         # TODO: Grids that grid the whole city map
@@ -43,14 +42,16 @@ class CityMap:
         Generate a random coordinate on the given map
         :return: a random Coordinate instance
         """
-        lo = self.bottomLeft.longitude + random.random() * (self.bottomRight.longitude - self.bottomLeft.longitude)
-        la = self.bottomLeft.latitude + random.random() * (self.topLeft.latitude - self.bottomLeft.latitude)
-        return Coordinate(longitude=round(lo, 5), latitude=round(la, 5))
+        la = self.bottom + random.random() * (self.top - self.bottom)
+        lo = self.left + random.random() * (self.right - self.left)
+        return Coordinate(latitude=round(la, 8), longitude=round(lo, 8))
 
 
 if __name__ == '__main__':
-    city_map = CityMap(Coordinate(0, 100), Coordinate(100, 100), Coordinate(0, 0), Coordinate(100, 0))
+    city_map = CityMap(left=0, right=40, bottom=0, top=40)
     print(city_map)
     t1 = Coordinate(1, 2)
     t2 = Coordinate(1, 4)
+    print("t1: " + str(t1))
+    print("t2: " + str(t2))
     print(t1 - t2)

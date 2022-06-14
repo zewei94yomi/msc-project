@@ -29,7 +29,7 @@ class Center:
         self.delivering_drones = list()
         self.create_order(num_orders)
         self.create_drones(num_drones)
-        self.plotter = Plotter(warehouses=self.warehouses)
+        self.plotter = Plotter(warehouses=self.warehouses, city_map=self.city_map)
         self.noise_tracker = NoiseTracker()
     
     def add_drone(self, drone=None):

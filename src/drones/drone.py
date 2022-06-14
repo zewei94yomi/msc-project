@@ -21,8 +21,8 @@ class Drone:
         self.status = DroneStatus.WAITING           # Status of the drone
         self.lo_speed = 0                           # Current longitude speed
         self.la_speed = 0                           # Current latitude speed
-        self.MAX_SPEED = 1                          # Maximum straight-line speed
-        self.NOISE = 1
+        self.MAX_SPEED = 0.005                         # Maximum straight-line speed
+        self.NOISE = 0.5
         # TODO: 未来可以重构这里，把destination变成一个list，那么路径就是destination里的一个个坐标点
         self.destination = None                     # Location of the next destination
     
@@ -113,21 +113,21 @@ class Drone:
         
         If the drone reaches the destination after this fly update, return True; otherwise return False
         """
-        lo_delta, la_delta = self.current_location - self.destination
-        if math.fabs(lo_delta) <= math.fabs(self.lo_speed) and math.fabs(la_delta) <= math.fabs(self.la_speed):
+        la_delta, lo_delta = self.current_location - self.destination
+        if math.fabs(la_delta) <= math.fabs(self.la_speed) and math.fabs(lo_delta) <= math.fabs(self.lo_speed):
             self.current_location.latitude = self.destination.latitude
             self.current_location.longitude = self.destination.longitude
             return True
         else:
-            self.current_location.longitude += self.lo_speed
             self.current_location.latitude += self.la_speed
+            self.current_location.longitude += self.lo_speed
             return False
     
     def update_speed(self):
         """Update speed according to the current destination"""
-        lo_distance, la_distance, direct_distance = distance(self.current_location, self.destination)
+        la_distance, lo_distance, direct_distance = distance(self.current_location, self.destination)
         if direct_distance == 0:
-            self.lo_speed = self.la_speed = 0
+            self.la_speed = self.lo_speed = 0
         else:
             self.la_speed = round(la_distance * self.MAX_SPEED / direct_distance, 7)
             self.lo_speed = round(lo_distance * self.MAX_SPEED / direct_distance, 7)

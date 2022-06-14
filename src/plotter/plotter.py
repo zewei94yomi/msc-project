@@ -2,10 +2,11 @@ import matplotlib.pyplot as plt
 from typing import List
 from cityMap.citymap import Coordinate
 from drones.drone import Drone
+from cityMap.citymap import CityMap
 
 
 class Plotter:
-    def __init__(self, warehouses: List[Coordinate]):
+    def __init__(self, warehouses: List[Coordinate], city_map: CityMap):
         self.img = plt.imread("recourses/map.jpeg")
         self.fig, self.ax = plt.subplots()
         self.warehouses_x = [x.longitude for x in warehouses]
@@ -14,8 +15,14 @@ class Plotter:
         self.drone_y = []
         self.order_x = []
         self.order_y = []
-        plt.xlim(-10, 50)
-        plt.ylim(-10, 50)
+        la_diff = city_map.right - city_map.left
+        lo_diff = city_map.top - city_map.bottom
+        self.mapLeft = city_map.left - 0.1 * lo_diff
+        self.mapRight = city_map.right + 0.1 * lo_diff
+        self.mapBottom = city_map.bottom - 0.1 * la_diff
+        self.mapTop = city_map.top + 0.1 * la_diff
+        plt.xlim(self.mapLeft, self.mapRight)
+        plt.ylim(self.mapBottom, self.mapTop)
         plt.ion()
     
     def saveData(self, drone: Drone):
@@ -34,7 +41,7 @@ class Plotter:
 
     def plot(self):
         plt.cla()
-        self.ax.imshow(self.img, extent=[-10, 50, -10, 50])
+        self.ax.imshow(self.img, extent=[self.mapLeft, self.mapRight, self.mapBottom, self.mapTop])
         # plot warehouse
         plt.scatter(self.warehouses_x, self.warehouses_y, color='blue', marker='p', linewidths=5)
         # plot drones

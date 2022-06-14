@@ -17,13 +17,13 @@ def distance(c1: Coordinate, c2: Coordinate):
     :param c1: current coordinate
     :param c2: another coordinate in the distance
     :return:
-        1. lo_distance: the longitude distance from c1 to c2
-        2. la_distance: the latitude distance from c1 to c2
+        1. la_distance: the latitude distance from c1 to c2
+        2. lo_distance: the longitude distance from c1 to c2
         3. line_distance: the straight-line distance from c1 to c2
     """
-    lo_distance, la_distance = c2 - c1
-    line_distance = math.sqrt(math.pow(lo_distance, 2) + math.pow(la_distance, 2))
-    return lo_distance, la_distance, line_distance
+    la_distance, lo_distance = c2 - c1
+    line_distance = math.sqrt(math.pow(la_distance, 2) + math.pow(lo_distance, 2))
+    return la_distance, lo_distance, line_distance
     
     
 def nearest_neighbor(neighbors, target: Coordinate) -> Coordinate:
