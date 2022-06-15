@@ -24,14 +24,16 @@ class Plotter:
         plt.xlim(self.mapLeft, self.mapRight)
         plt.ylim(self.mapBottom, self.mapTop)
         plt.ion()
-    
-    def saveData(self, drone: Drone):
-        self.drone_x.append(drone.current_location.longitude)
-        self.drone_y.append(drone.current_location.latitude)
-        self.order_x.append(drone.order.start_location.longitude)
-        self.order_x.append(drone.order.end_location.longitude)
-        self.order_y.append(drone.order.start_location.latitude)
-        self.order_y.append(drone.order.end_location.latitude)
+        
+    def save_and_plot(self, drones: List[Drone]):
+        for drone in drones:
+            self.drone_x.append(drone.current_location.longitude)
+            self.drone_y.append(drone.current_location.latitude)
+            self.order_x.append(drone.order.start_location.longitude)
+            self.order_x.append(drone.order.end_location.longitude)
+            self.order_y.append(drone.order.start_location.latitude)
+            self.order_y.append(drone.order.end_location.latitude)
+        self.plot()
 
     def clearData(self):
         self.drone_x.clear()

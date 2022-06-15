@@ -1,8 +1,8 @@
 import shortuuid
 import math
 from cityMap.citymap import Coordinate
-from typing import List
 import numpy as np
+from typing import List
 
 
 def get_uuid():
@@ -12,39 +12,21 @@ def get_uuid():
 
 def distance(c1: Coordinate, c2: Coordinate):
     """
-    Calculate distance between two coordinates
+    Calculate distances between two coordinates
     
     :param c1: current coordinate
-    :param c2: another coordinate in the distance
+    :param c2: another coordinate
     :return:
-        1. la_distance: the latitude distance from c1 to c2
-        2. lo_distance: the longitude distance from c1 to c2
-        3. line_distance: the straight-line distance from c1 to c2
+        1. la_distance: latitude distance from c1 to c2
+        2. lo_distance: longitude distance from c1 to c2
+        3. line_distance: straight-line distance from c1 to c2
     """
     la_distance, lo_distance = c2 - c1
     line_distance = math.sqrt(math.pow(la_distance, 2) + math.pow(lo_distance, 2))
     return la_distance, lo_distance, line_distance
     
-    
-def nearest_neighbor(neighbors, target: Coordinate) -> Coordinate:
-    """
-    Find the nearest neighbor to the target location.
-    
-    :param neighbors: All candidate neighbors around the target
-    :param target:  The target location
-    :return: The location of the nearest neighbor
-    """
-    min_distance = float('inf')
-    nearest = None
-    for neighbor in neighbors:
-        _, _, line_distance = distance(neighbor, target)
-        if line_distance < min_distance:
-            nearest = neighbor
-            min_distance = line_distance
-    return nearest
 
-
-def nearest_neighbor_idx(neighbors, target: Coordinate) -> int:
+def nearest_neighbor_idx(neighbors: List[Coordinate], target: Coordinate) -> int:
     """
     Find the index of the nearest neighbor to the target location.
 
@@ -57,6 +39,17 @@ def nearest_neighbor_idx(neighbors, target: Coordinate) -> int:
         _, _, line_distance = distance(neighbor, target)
         distances.append(line_distance)
     return np.argmin(distances)
+    
+    
+def nearest_neighbor(neighbors: List[Coordinate], target: Coordinate) -> Coordinate:
+    """
+    Find the nearest neighbor to the target location.
+    
+    :param neighbors: All candidate neighbors around the target
+    :param target:  The target location
+    :return: The location of the nearest neighbor
+    """
+    return neighbors[nearest_neighbor_idx(neighbors, target)]
 
 
 def nearest_free_drone(order, free_drones):
@@ -66,11 +59,9 @@ def nearest_free_drone(order, free_drones):
     :param free_drones: all free drones that can chosen from
     :return the nearest drone
     """
-    distances = []
-    for drone in free_drones:
-        _, _, line_distance = distance(order.start_location, drone.current_location)
-        distances.append(line_distance)
-    return free_drones[np.argmin(distances)]
+    return free_drones[nearest_neighbor_idx(
+        neighbors=[x.current_location for x in free_drones],
+        target=order.start_location)]
 
 
 if __name__ == '__main__':

@@ -6,6 +6,8 @@ from commons.decorators import auto_str
 class Coordinate:
     """
     Coordinate of a location on maps.
+    
+    (latitude, longitude)
     """
     
     def __init__(self, latitude: float, longitude: float):
@@ -20,14 +22,14 @@ class Coordinate:
         return self.latitude - other.latitude, self.longitude - other.longitude
     
     def __str__(self):
-        return f"[la={round(self.latitude, 4)}, lo={round(self.longitude, 4)}]"
+        return f"[la={round(self.latitude, 6)}, lo={round(self.longitude, 6)}]"
 
 
 @auto_str
 class CityMap:
     """ The city map of drones food delivery """
     
-    def __init__(self, left, right, bottom, top,
+    def __init__(self, left: float, right: float, bottom: float, top: float,
                  population_density=None):
         self.left = left
         self.right = right
@@ -37,14 +39,14 @@ class CityMap:
         self.population_density = population_density
         # TODO: Grids that grid the whole city map
     
-    def generate_random_coord(self) -> Coordinate:
+    def get_random_coord(self) -> Coordinate:
         """
         Generate a random coordinate on the given map
-        :return: a random Coordinate instance
+        :return: a random Coordinate
         """
-        la = self.bottom + random.random() * (self.top - self.bottom)
-        lo = self.left + random.random() * (self.right - self.left)
-        return Coordinate(latitude=round(la, 8), longitude=round(lo, 8))
+        latitude = self.bottom + random.random() * (self.top - self.bottom)
+        longitude = self.left + random.random() * (self.right - self.left)
+        return Coordinate(latitude=round(latitude, 6), longitude=round(longitude, 6))
 
 
 if __name__ == '__main__':

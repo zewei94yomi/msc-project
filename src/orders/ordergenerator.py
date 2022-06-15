@@ -27,8 +27,8 @@ class OrderGenerator:
         """
         self.ids += 1
         if use_density is False:
-            start_location = self.city_map.generate_random_coord()
-            end_location = self.city_map.generate_random_coord()
+            start_location = self.city_map.get_random_coord()
+            end_location = self.city_map.get_random_coord()
             fake_time = self.faker.date_time_between(start_date=start_time,
                                                      end_date=end_time)
             return Order(order_id=self.ids, uuid=get_uuid(), start_location=start_location, end_location=end_location,
