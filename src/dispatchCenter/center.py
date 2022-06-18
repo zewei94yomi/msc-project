@@ -6,7 +6,8 @@ from cityMap.citymap import Coordinate, CityMap
 from drones.dronegenerator import DroneGenerator
 from orders.ordergenerator import OrderGenerator
 from typing import List
-from plotter.plotter import Plotter
+from visual.plotter import Plotter
+from visual.vismap import VisualMap
 from noise.tracker import NoiseTracker
 
 
@@ -21,6 +22,7 @@ class Center:
         self.delivering_drones = list()
         self.plotter = Plotter(warehouses=self.warehouses, city_map=city_map)
         self.noise_tracker = NoiseTracker()
+        self.visual_map = VisualMap(noise_track=self.noise_tracker)
         self.init_drones(num_drones)
         self.init_orders(num_orders)
 

@@ -50,6 +50,6 @@ class Plotter:
         plt.scatter(self.drone_x, self.drone_y, color='red', linewidths=0.5)
         # plot orders
         plt.scatter(self.order_x, self.order_y, color='green', marker='v', linewidths=1)
-        # clear plotter cache
+        # clear visual cache
         self.clearData()
         plt.pause(0.0001)
