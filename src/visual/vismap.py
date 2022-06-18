@@ -10,6 +10,8 @@ from noise.tracker import NoiseTracker
 class VisualMap:
     """
     Visualize graphical tracts, population density and noise heatmap.
+    
+    Folium Map Tutorial: https://vverde.github.io/blob/interactivechoropleth.html
     """
     
     def __init__(self, noise_track: NoiseTracker):
@@ -38,7 +40,7 @@ class VisualMap:
             key_on="properties.id2",
             fill_color='YlGnBu',
             threshold_scale=self.scale,
-            fill_opacity=1,
+            fill_opacity=0.7,
             line_opacity=0.2,
             legend_name='Population Density',
             smooth_factor=0
