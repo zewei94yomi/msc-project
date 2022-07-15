@@ -10,14 +10,13 @@ class Order:
     Food delivery orders.
     """
     
-    def __init__(self, order_id, uuid, start_location: Coordinate, end_location: Coordinate, time: datetime, description=""):
-        self.order_id = order_id                # order's id in the program
-        self.uuid = uuid                        # Unique ID
+    def __init__(self, order_id, start_location: Coordinate, end_location: Coordinate, time: datetime, description=""):
+        self.order_id = order_id                # Order id
         self.start_location = start_location    # Start location
         self.end_location = end_location        # End location
         self.generate_time = time               # Generated time
         self.deliver_time = None                # Delivered time
-        self.status = None                      # Current status: 1.WAITING 2.ACCEPTED 3.DELIVERING 4.DELIVERED
+        self.status = None                      # Order's status
         self.description = description          # Order description
         self.generate()
         

@@ -1,12 +1,11 @@
-from cityMap.citymap import CityMap, Coordinate
+from cityMap.citymap import CityMap
 from dispatchCenter.center import Center
+from commons.configuration import MAP_LEFT, MAP_RIGHT, MAP_TOP, MAP_BOTTOM
+from commons.configuration import WAREHOUSES, ORDERS, DRONES
 
 if __name__ == '__main__':
-    # plt.xlim(37.710808, 37.810894)
-    # plt.ylim(-122.516112, -122.378443)
-    # t_city_map = CityMap(Coordinate(0, 40), Coordinate(40, 40), Coordinate(0, 0), Coordinate(40, 0))
-    t_city_map = CityMap(left=-122.516112, right=-122.378443,
-                         bottom=37.710808, top=37.810894)
-    center = Center(warehouses=[Coordinate(37.750808, -122.478443)],
-                    city_map=t_city_map, num_orders=10, num_drones=3)
+    center = Center(warehouses=WAREHOUSES,
+                    city_map=CityMap(left=MAP_LEFT, right=MAP_RIGHT, bottom=MAP_BOTTOM, top=MAP_TOP),
+                    num_orders=ORDERS,
+                    num_drones=DRONES)
     center.run()

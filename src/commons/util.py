@@ -324,7 +324,7 @@ class Counter(dict):
         Edits the counter such that the total count of all
         keys sums to 1.  The ratio of counts for all keys
         will remain the same. Note that normalizing an empty
-        Counter will result in an error.
+        Counter will results in an error.
         """
         total = float(self.totalCount())
         if total == 0: return

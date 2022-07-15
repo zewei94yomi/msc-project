@@ -1,6 +1,11 @@
 import math
 import random
 from commons.decorators import auto_str
+from commons.configuration import CRS, GEO_PATH, PD_PATH, RANDOM_LA_COORD_OFFSET, RANDOM_LO_COORD_OFFSET
+import pandas as pd
+import geopandas as gpd
+import numpy as np
+from typing import List
 
 
 class Coordinate:
@@ -22,32 +27,67 @@ class Coordinate:
         return self.latitude - other.latitude, self.longitude - other.longitude
     
     def __str__(self):
-        return f"[la={round(self.latitude, 6)}, lo={round(self.longitude, 6)}]"
+        return f"[la={self.latitude}, lo={self.longitude}]"
 
 
 @auto_str
 class CityMap:
     """ The city map of drones food delivery """
     
-    def __init__(self, left: float, right: float, bottom: float, top: float,
-                 population_density=None):
+    def __init__(self, left: float, right: float, bottom: float, top: float):
         self.left = left
         self.right = right
         self.bottom = bottom
         self.top = top
-        # TODO: Population density of the whole city map, 使用我找的人口密度图的网站！上面有位置坐标！
-        self.population_density = population_density
-        # TODO: Grids that grid the whole city map
+        self.geo = gpd.read_file(GEO_PATH)
+        self.pd_data = pd.read_csv(PD_PATH)
+        pd_sum = self.pd_data['Population_Density_in_2010'].sum()
+        self.pd_prob = [x / pd_sum for x in self.pd_data['Population_Density_in_2010']]
     
-    def get_random_coord(self) -> Coordinate:
+    def get_coord(self, num, bias=True) -> List[Coordinate]:
         """
-        Generate a random coordinate on the given map
-        :return: a random Coordinate
+        Generate a list of coordinates.
+        
+        :param num: the number of coordinates that need to be generated
+        :param bias: whether bias coordinates to population density distribution
+        :return: a list of coordinates
         """
-        latitude = self.bottom + random.random() * (self.top - self.bottom)
-        longitude = self.left + random.random() * (self.right - self.left)
-        return Coordinate(latitude=round(latitude, 6), longitude=round(longitude, 6))
-
+        if bias:
+            return self.get_n_bias_coord(num)
+        else:
+            return self.get_n_random_coord(num)
+    
+    def get_n_random_coord(self, num) -> List[Coordinate]:
+        """
+        Generate a list of random coordinates on the given map
+        :return: a list of random Coordinate
+        """
+        coords = list()
+        for i in range(num):
+            latitude = self.bottom + random.random() * (self.top - self.bottom)
+            longitude = self.left + random.random() * (self.right - self.left)
+            coords.append(Coordinate(latitude=latitude, longitude=longitude))
+        return coords
+    
+    def get_n_bias_coord(self, num) -> List[Coordinate]:
+        """
+        Generate a list of coordinate bias to population density distribution
+        :return: a list of biased coordinates
+        """
+        count = 0
+        pop_coords = list()
+        while count < num:
+            tracts = np.random.choice(self.pd_data['tract'], num - count, p=self.pd_prob)
+            for tract in tracts:
+                geo = self.geo[self.geo['id2'] == tract]
+                if geo.empty is False:
+                    centroid = geo.to_crs(CRS).centroid.to_crs(self.geo.crs).values[0]
+                    centroid_lo = centroid.x + random.uniform(-RANDOM_LO_COORD_OFFSET, RANDOM_LO_COORD_OFFSET)
+                    centroid_la = centroid.y + random.uniform(-RANDOM_LA_COORD_OFFSET, RANDOM_LA_COORD_OFFSET)
+                    pop_coords.append(Coordinate(latitude=centroid_la, longitude=centroid_lo))
+                    count += 1
+        return pop_coords
+        
 
 if __name__ == '__main__':
     city_map = CityMap(left=0, right=40, bottom=0, top=40)

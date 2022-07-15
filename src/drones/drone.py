@@ -3,6 +3,8 @@ from orders.order import Order
 from commons.decorators import auto_str
 from commons.enum import DroneStatus
 from commons.my_util import distance, nearest_neighbor
+from commons.constants import DRONE_NOISE, DRONE_MAX_SPEED
+from commons.configuration import PRINT_TERMINAL, MAP_TOP, MAP_LEFT, MAP_RIGHT, MAP_BOTTOM
 from datetime import datetime
 from typing import List
 import math
@@ -10,20 +12,19 @@ import math
 
 @auto_str
 class Drone:
-    def __init__(self, drone_id, uuid, warehouses: List[Coordinate], start_location: Coordinate, height: float):
-        self.drone_id = drone_id                    # Drone's id
-        self.uuid = uuid                            # Unique ID
-        self.warehouses = warehouses                # Locations of warehouse
-        self.current_location = start_location      # Current location of the drone
-        self.height = height                        # Current height of the drone
-        self.order = None                           # Current Order the drone has accepted
-        self.status = DroneStatus.WAITING           # Status of the drone
+    def __init__(self, drone_id, warehouses: List[Coordinate], start_location: Coordinate, height):
+        self.drone_id = drone_id                    # Drone id
+        self.warehouses = warehouses                # Coordinates of warehouses
+        self.location = start_location              # Location of the drone
+        self.height = height                        # Height of the drone TODO: implement height of drones
+        self.order = None                           # Current accepted order
+        self.status = DroneStatus.WAITING           # Drone's status
         self.lo_speed = 0                           # Current longitude speed
         self.la_speed = 0                           # Current latitude speed
-        self.MAX_SPEED = 0.002                      # Maximum straight-line speed
-        self.NOISE = 0.15
-        # TODO: 未来可以重构这里，把destination变成一个list，那么路径就是destination里的一个个坐标点
-        self.destination = None                     # Location of the next destination
+        self.MAX_SPEED = DRONE_MAX_SPEED            # Maximum straight-line speed TODO: lon max-speed and lat max-speed
+        self.NOISE = DRONE_NOISE                    # Default maximum drone noise
+        # TODO: treat 'destination' as a list，so the path would be locations in 'destination'
+        self.destination = None                     # Next destination
     
     def accept_order(self, order: Order):
         """
@@ -38,8 +39,9 @@ class Drone:
         self.status = DroneStatus.COLLECTING
         self.destination = self.order.start_location
         self.update_speed()
-        print(f"[{datetime.now()}] Drone '{self.drone_id}' accepted Order '{self.order.order_id}'")
-        print(f"[{datetime.now()}] Drone '{self.drone_id}' is flying to {self.destination} to pick up food")
+        if PRINT_TERMINAL:
+            print(f"[{datetime.now()}] Drone '{self.drone_id}' accepted Order '{self.order.order_id}'")
+            print(f"[{datetime.now()}] Drone '{self.drone_id}' is flying to {self.destination} to pick up food")
     
     def collect_food(self):
         """
@@ -53,8 +55,9 @@ class Drone:
         self.status = DroneStatus.DELIVERING
         self.destination = self.order.end_location
         self.update_speed()
-        print(f"[{datetime.now()}] Drone '{self.drone_id}' collected Order '{self.order.order_id}'")
-        print(f"[{datetime.now()}] Drone '{self.drone_id}' is flying to {self.destination} to deliver food")
+        if PRINT_TERMINAL:
+            print(f"[{datetime.now()}] Drone '{self.drone_id}' collected Order '{self.order.order_id}'")
+            print(f"[{datetime.now()}] Drone '{self.drone_id}' is flying to {self.destination} to deliver food")
     
     def give_food(self):
         """
@@ -67,10 +70,11 @@ class Drone:
         """
         self.order.complete()
         self.status = DroneStatus.RETURNING
-        self.destination = nearest_neighbor(neighbors=self.warehouses, target=self.current_location)
+        self.destination = nearest_neighbor(neighbors=self.warehouses, target=self.location)
         self.update_speed()
-        print(f"[{datetime.now()}] Drone '{self.drone_id}' delivered Order '{self.order.order_id}'")
-        print(f"[{datetime.now()}] Drone '{self.drone_id}' is flying to {self.destination} to recharge")
+        if PRINT_TERMINAL:
+            print(f"[{datetime.now()}] Drone '{self.drone_id}' delivered Order '{self.order.order_id}'")
+            print(f"[{datetime.now()}] Drone '{self.drone_id}' is flying to {self.destination} to recharge")
     
     def recharge(self):
         """
@@ -85,11 +89,15 @@ class Drone:
         self.destination = None
         self.lo_speed = 0
         self.la_speed = 0
-        print(f"[{datetime.now()}] Drone '{self.drone_id}' returned to the nearest warehouse and start to recharge")
-        print(f"[{datetime.now()}] Drone '{self.drone_id}' is recharging and waiting for new orders")
+        if PRINT_TERMINAL:
+            print(f"[{datetime.now()}] Drone '{self.drone_id}' returned to the nearest warehouse and start to recharge")
+            print(f"[{datetime.now()}] Drone '{self.drone_id}' is recharging and waiting for new orders")
     
     def update(self):
         """Update drone's position and status based on its current status"""
+        if self.location.latitude > MAP_TOP or self.location.latitude < MAP_BOTTOM \
+            or self.location.longitude > MAP_RIGHT or self.location.longitude < MAP_LEFT:
+            print(f"{self} is out of boundary")
         if self.status is DroneStatus.COLLECTING:
             if self.fly() is True:
                 self.collect_food()
@@ -101,35 +109,33 @@ class Drone:
                 self.recharge()
         else:
             # Current status is DroneStatus.WAITING
-            print(f"[{datetime.now()}] Drone '{self.drone_id}' is waiting for new orders")
-    
-    def produce_noise(self):
-        return self.NOISE
+            if PRINT_TERMINAL:
+                print(f"[{datetime.now()}] Drone '{self.drone_id}' is waiting for new orders")
     
     def fly(self) -> bool:
         """
         Fly to the current destination
         
-        If the drone reaches the destination after this fly update, return True; otherwise return False
+        If the drone reaches the destination after this update, return True; otherwise return False
         """
-        la_delta, lo_delta = self.current_location - self.destination
-        if math.fabs(la_delta) <= math.fabs(self.la_speed) and math.fabs(lo_delta) <= math.fabs(self.lo_speed):
-            self.current_location.latitude = self.destination.latitude
-            self.current_location.longitude = self.destination.longitude
+        la_delta, lo_delta = self.destination - self.location
+        if math.fabs(la_delta) <= math.fabs(self.la_speed) or math.fabs(lo_delta) <= math.fabs(self.lo_speed):
+            self.location.latitude = self.destination.latitude
+            self.location.longitude = self.destination.longitude
             return True
         else:
-            self.current_location.latitude += self.la_speed
-            self.current_location.longitude += self.lo_speed
+            self.location.latitude += self.la_speed
+            self.location.longitude += self.lo_speed
             return False
     
     def update_speed(self):
         """Update speed according to the current destination"""
-        la_distance, lo_distance, direct_distance = distance(self.current_location, self.destination)
+        la_distance, lo_distance, direct_distance = distance(self.location, self.destination)
         if direct_distance == 0:
             self.la_speed = self.lo_speed = 0
         else:
-            self.la_speed = round(la_distance * self.MAX_SPEED / direct_distance, 7)
-            self.lo_speed = round(lo_distance * self.MAX_SPEED / direct_distance, 7)
+            self.la_speed = la_distance * self.MAX_SPEED / direct_distance
+            self.lo_speed = lo_distance * self.MAX_SPEED / direct_distance
 
 
 if __name__ == '__main__':
