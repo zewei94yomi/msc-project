@@ -1,4 +1,3 @@
-import math
 import random
 from commons.decorators import auto_str
 from commons.configuration import CRS, GEO_PATH, PD_PATH, RANDOM_LA_COORD_OFFSET, RANDOM_LO_COORD_OFFSET
@@ -20,8 +19,7 @@ class Coordinate:
         self.longitude = longitude  # x
     
     def __eq__(self, other):
-        return math.isclose(self.latitude, other.latitude, rel_tol=0, abs_tol=0.00001) and \
-               math.isclose(self.longitude, other.longitude, rel_tol=0, abs_tol=0.00001)
+        return self.latitude == other.latitude and self.longitude == other.longitude
     
     def __sub__(self, other):
         return self.latitude - other.latitude, self.longitude - other.longitude

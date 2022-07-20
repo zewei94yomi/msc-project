@@ -1,7 +1,7 @@
 from commons.decorators import auto_str
 from commons.my_util import calculate_noise_m
 from commons.constants import M_2_LATITUDE, M_2_LONGITUDE
-from commons.configuration import NOISE_BASE_PATH, TRACKER_TIME_SLICE, SAVE_CSV
+from commons.configuration import NOISE_BASE_PATH, TRACKER_ITERATIONS, SAVE_CSV
 from commons.configuration import TRACK_NOISE_THRESHOLD, NOISE_CELL_LENGTH, NOISE_CELL_WIDTH, NOISE_CELL_NUM
 from drones.drone import Drone
 from datetime import datetime
@@ -10,10 +10,10 @@ import csv
 
 @auto_str
 class NoiseTracker:
-    
+    """Deprecated, use 'DensityMatrix'"""
     def __init__(self):
-        self.noise = list()                     # [latitude, longitude, noise, time slice]
-        self.TIME_GAP = TRACKER_TIME_SLICE
+        self.noise = list()     # [latitude, longitude, noise, step slice]
+        self.TIME_GAP = TRACKER_ITERATIONS
         self.time_slice = 0
         self.BASE_PATH = NOISE_BASE_PATH
 

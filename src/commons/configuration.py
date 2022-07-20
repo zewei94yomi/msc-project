@@ -1,36 +1,48 @@
 # Print on the terminal
-PRINT_TERMINAL = False
+PRINT_TERMINAL = True
 # Plot the simulation
 PLOT_SIMULATION = True
-# Use NoiseTracker to track noise
-USE_TRACKER = False
-# Save noise trajectory data to local in csv; need to use tracker
+# Use DensityMatrix to track noise: tracking noise in matrix
+USE_DENSITY_MATRIX = True
+# Use local order data; otherwise generate new orders
+USE_LOCAL_ORDER = True
+# Prioritize to low-average-noise cells, i.e. prioritize fairness
+PRIORITIZE = False
+PRIORITIZE_K = 40
+# Use NoiseTracker to track noise (DEPRECATED: default to be False)
+USE_NOISE_TRACKER = False
+# Save noise trajectory data to local in csv; need to use NoiseTracker
 SAVE_CSV = True
-# Use DensityMatrix to track noise: track noise in matrix and plot data
-USE_MATRIX = True
 
-# Noise matrix cell size (meter)
-NOISE_CELL_LENGTH = 80
-NOISE_CELL_WIDTH = 80
-# Used in 'Tracker' for radiating noise
+# Coordinates of warehouses
+WAREHOUSES = [[37.751800, -122.478555], [37.72, -122.428], [37.78, -122.39]]
+# Total number of orders
+ORDERS = 4
+# Total number of drones
+DRONES = 2
+
+# Noise matrix cell size (in meter)
+NOISE_CELL_LENGTH = 100
+NOISE_CELL_WIDTH = 100
+# Used in 'Tracker' for radiating noise, the radius for radiation will be NOISE_CELL_LENGTH * NOISE_CELL_NUM
 NOISE_CELL_NUM = 5
 # The minimum noise level that the tracker will store, e.g. if the mixed noise is 39db, then it will be ignored
 TRACK_NOISE_THRESHOLD = 40
 
-# Noise Tracker & Density Matrix
-# The number of rounds that a tracker will save noise data to local
-# e.g. TRACKER_TIME_SLICE = 20, the program will run 20 iterations
-# and save noise data to local and clear them from the memory
-TRACKER_TIME_SLICE = 10
+# The number of iterations that a tracker will write noise data to the local
+# e.g. TRACKER_ITERATIONS = 20, the program will run 20 iterations
+# and save noise data to the local and clean the memory
+TRACKER_ITERATIONS = 10
 
-# Center iteration running time
-# e.g. CENTER_PER_SLICE_TIME = 1s, the program will run each iteration for 0.5 second
-# when it's time to writing data to local, the program will slow down a little bit, but it will run faster in the next
-# a few iterations to compensate for the slow-down
-CENTER_PER_SLICE_TIME = 1
-
+# Center iteration running step
+# e.g. CENTER_PER_SLICE_TIME = 1s, the program will run each iteration for 0.5 second (if possible)
+# when it's the iteration to writing data to local, the program will slow down a little bit,
+# but it will run faster in the next a few iterations to compensate for the slow-down
+CENTER_PER_SLICE_TIME = 0.5
 
 # Path
+# Base path for saving/loading orders to/from the local
+ORDER_BASE_PATH = 'recourses/data/order/orders.csv'
 # Base path for saving/loading noise tracking data
 NOISE_BASE_PATH = 'recourses/results/noise/trajectory'
 # Base path for saving heatmap/density map
@@ -48,20 +60,15 @@ MATRIX_BASE_PATH = 'recourses/results/noise/matrix'
 
 # Map
 CRS = 'epsg:3857'
+# Map boundary
 MAP_LEFT = -122.520
 MAP_RIGHT = -122.375
 MAP_TOP = 37.820
 MAP_BOTTOM = 37.700
-# offset 200m (latitude) to the random generated coordinate
+# offset 0-200m (latitude) to a random generated coordinate
 RANDOM_LA_COORD_OFFSET = 0.001802
+# offset 0-200m (longitude) to a random generated coordinate
 RANDOM_LO_COORD_OFFSET = 0.002278
-
-# Coordinates of warehouses
-WAREHOUSES = [[37.751800, -122.478555], [37.72, -122.428], [37.78, -122.39]]
-# Total number orders
-ORDERS = 10
-# Total number of drones
-DRONES = 10
 
 # geo popup layer style and highlight functions
 style_function = lambda x: {'fillColor': '#ffffff',

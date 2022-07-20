@@ -14,8 +14,8 @@ class Order:
         self.order_id = order_id                # Order id
         self.start_location = start_location    # Start location
         self.end_location = end_location        # End location
-        self.generate_time = time               # Generated time
-        self.deliver_time = None                # Delivered time
+        self.generate_time = time               # Generated step
+        self.deliver_time = None                # Delivered step
         self.status = None                      # Order's status
         self.description = description          # Order description
         self.generate()
@@ -40,7 +40,3 @@ class Order:
         self.deliver_time = datetime.now()
         self.status = OrderStatus.COMPLETE
         # print(f"[{datetime.now()}] Order '{self.order_id}' is complete")
-        
-
-if __name__ == '__main__':
-    print("Use OrderGenerator to test Order")

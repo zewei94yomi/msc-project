@@ -5,7 +5,7 @@ from commons.configuration import MATRIX_BASE_PATH
 from commons.configuration import OVERLAY_BASE_PATH, GEO_PATH, PD_PATH, CRS
 from commons.configuration import style_function, highlight_function
 from commons.constants import M_2_LONGITUDE, M_2_LATITUDE
-from commons.my_util import multi_source_sound_level, distance, calculate_noise_coord
+from commons.my_util import multi_source_sound_level, distance_coordinates, calculate_noise_coord
 from cityMap.citymap import Coordinate
 import math
 import numpy as np
@@ -20,7 +20,9 @@ from folium.raster_layers import ImageOverlay
 
 @auto_str
 class Cell:
-    def __init__(self, latitude, longitude):
+    def __init__(self, latitude, longitude, row, col):
+        self.row = row
+        self.col = col
         self.centroid = Coordinate(latitude, longitude)
         self.total_noise = 0
         self.max_noise = 0
@@ -49,8 +51,32 @@ class DensityMatrix:
         self.cell_width_la = self.cell_width_m * M_2_LATITUDE
         self.rows = math.floor((MAP_TOP - MAP_BOTTOM) / self.cell_width_la)
         self.cols = math.floor((MAP_RIGHT - MAP_LEFT) / self.cell_length_lo)
-        self.matrix = [[Cell(self.top - (i + 1 / 2) * self.cell_width_la, self.left + (j + 1 / 2) * self.cell_length_lo)
+        self.matrix = [[Cell(latitude=self.top - (i + 1 / 2) * self.cell_width_la,
+                             longitude=self.left + (j + 1 / 2) * self.cell_length_lo,
+                             row=i, col=j)
                         for j in range(self.cols)] for i in range(self.rows)]
+
+    def is_valid(self, longitude, latitude):
+        if longitude >= self.right or longitude < self.left:
+            return False
+        if latitude >= self.top or latitude < self.bottom:
+            return False
+        return True
+    
+    def get_average_matrix(self, time_count):
+        return np.array([[self.matrix[i][j].total_noise / time_count for j in range(self.cols)]
+                         for i in range(self.rows)])
+    
+    def get_cell(self, coordinate: Coordinate):
+        lon = coordinate.longitude
+        lat = coordinate.latitude
+        if self.is_valid(lon, lat) is False:
+            print(f"WARNING: No cell is found at (lon:{lon}, lat:{lat})")
+            return None
+        else:
+            row = math.floor(abs(lat - self.top) / (self.cell_width_m * M_2_LATITUDE))
+            col = math.floor(abs(lon - self.left) / (self.cell_length_m * M_2_LONGITUDE))
+            return self.matrix[row][col]
     
     def track_noise(self, drones):
         """
@@ -64,17 +90,23 @@ class DensityMatrix:
                 cell = self.matrix[i][j]
                 noises = []
                 for drone in drones:
-                    lat_dist, lon_dist, _ = distance(cell.centroid, drone.location)
-                    noise = calculate_noise_coord(x_dist=lon_dist, y_dist=lat_dist, central_noise=drone.NOISE)
+                    lat_dist, lon_dist, line_dist = distance_coordinates(cell.centroid, drone.location)
+                    if line_dist == 0:
+                        noise = drone.NOISE
+                    else:
+                        noise = calculate_noise_coord(x_dist=lon_dist, y_dist=lat_dist, central_noise=drone.NOISE)
                     noises.append(noise)
                 mixed_noise = multi_source_sound_level(noises)
                 cell.receive_noise(mixed_noise)
+    
+    def calculate_std(self, time_count):
+        return np.std(self.get_average_matrix(time_count))
     
     def plot_matrix(self, time_count):
         """
         Plot a maximum and an average density matrix in 'time_count'.
         
-        :param time_count: a period of time
+        :param time_count: a period of step
         :return:
         """
         la = np.linspace(self.top, self.bottom, self.rows)
@@ -85,22 +117,22 @@ class DensityMatrix:
         Z_max = np.array(max_noises)
         X, Y = np.meshgrid(lo, la)
         time = datetime.now().strftime("%m-%d_%H:%M:%S")
-        avg_title = f"Average Noise Matrix from {time_count} to {time_count}"
-        max_title = f"Maximum Noise Matrix from {time_count} to {time_count}"
+        avg_title = f"Average Noise Matrix in {time_count}, std={self.calculate_std(time_count)}"
+        max_title = f"Maximum Noise Matrix in {time_count}"
         avg_path = MATRIX_BASE_PATH + "/images/average/" + time
         max_path = MATRIX_BASE_PATH + "/images/maximum/" + time
-        self.plotpcolormesh(X, Y, Z_avg, avg_title, avg_path)
-        self.plotpcolormesh(X, Y, Z_max, max_title, max_path)
+        self.plot_pcolormesh(X, Y, Z_avg, avg_title, avg_path)
+        self.plot_pcolormesh(X, Y, Z_max, max_title, max_path)
         self.overlay()
 
-    def plotpcolormesh(self, X, Y, Z, title, path):
+    def plot_pcolormesh(self, X, Y, Z, title, path):
         fig, ax = plt.subplots()
         plt.pcolormesh(X, Y, Z)
         plt.colorbar()
         plt.title(title)
         plt.savefig(path, bbox_inches='tight')
         plt.close()
-        
+    
     def overlay(self):
         geo = gpd.read_file(GEO_PATH)
         pd_data = pd.read_csv(PD_PATH)

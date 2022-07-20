@@ -1,6 +1,6 @@
 from commons.decorators import auto_str
 from commons.configuration import NOISE_BASE_PATH, HEATMAP_BASE_PATH
-from commons.configuration import TRACKER_TIME_SLICE, NOISE_CELL_LENGTH, NOISE_CELL_WIDTH
+from commons.configuration import TRACKER_ITERATIONS, NOISE_CELL_LENGTH, NOISE_CELL_WIDTH
 from commons.configuration import MAP_LEFT, MAP_RIGHT, MAP_TOP, MAP_BOTTOM
 from commons.constants import M_2_LONGITUDE, M_2_LATITUDE
 from commons.my_util import multi_source_sound_level
@@ -40,7 +40,7 @@ class DensityMatrix:
         self.right = MAP_RIGHT
         self.top = MAP_TOP
         self.bottom = MAP_BOTTOM
-        self.TIME_GAP = TRACKER_TIME_SLICE
+        self.TIME_GAP = TRACKER_ITERATIONS
         self.cell_length_m = NOISE_CELL_LENGTH
         self.cell_width_m = NOISE_CELL_WIDTH
         self.cell_length_lo = self.cell_length_m * M_2_LONGITUDE
@@ -105,7 +105,7 @@ class DensityMatrix:
         Z = np.array(noise)
         X, Y = np.meshgrid(lo, la)
         save_path = "../" + HEATMAP_BASE_PATH + "/matplotlib/maximum/" + file_name
-        title = "Maximum Noise Level in " + str(TRACKER_TIME_SLICE) + " time slice"
+        title = "Maximum Noise Level in " + str(TRACKER_ITERATIONS) + " step slice"
         self.plot_pcolormesh(X, Y, Z, 10, 100, title, save_path)
         
     def calculate_average(self, file_name):
@@ -121,7 +121,7 @@ class DensityMatrix:
         Z = np.array(noise)
         X, Y = np.meshgrid(lo, la)
         save_path = "../" + HEATMAP_BASE_PATH + "/matplotlib/average/" + file_name
-        title = "Average Noise Level in " + str(TRACKER_TIME_SLICE) + " time slice"
+        title = "Average Noise Level in " + str(TRACKER_ITERATIONS) + " step slice"
         self.plot_pcolormesh(X, Y, Z, 10, 100, title, save_path)
         
     def plot_pcolormesh(self, X, Y, Z, colorbar_min, colorbar_max, title, save_path):
