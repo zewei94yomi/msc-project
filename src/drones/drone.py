@@ -2,29 +2,28 @@ from cityMap.citymap import Coordinate
 from orders.order import Order
 from commons.decorators import auto_str
 from commons.enum import DroneStatus
-from commons.my_util import distance, nearest_neighbor
-from commons.constants import DRONE_NOISE, DRONE_MAX_SPEED
+from commons.my_util import nearest_neighbor, distance_coordinates
+from commons.constants import DRONE_NOISE
 from commons.configuration import PRINT_TERMINAL, MAP_TOP, MAP_LEFT, MAP_RIGHT, MAP_BOTTOM
 from datetime import datetime
 from typing import List
-import math
+from drones.tracker import Tracker
 
 
 @auto_str
 class Drone:
     def __init__(self, drone_id, warehouses: List[Coordinate], start_location: Coordinate, height):
-        self.drone_id = drone_id                    # Drone id
-        self.warehouses = warehouses                # Coordinates of warehouses
-        self.location = start_location              # Location of the drone
-        self.height = height                        # Height of the drone TODO: implement height of drones
-        self.order = None                           # Current accepted order
-        self.status = DroneStatus.WAITING           # Drone's status
-        self.lo_speed = 0                           # Current longitude speed
-        self.la_speed = 0                           # Current latitude speed
-        self.MAX_SPEED = DRONE_MAX_SPEED            # Maximum straight-line speed TODO: lon max-speed and lat max-speed
-        self.NOISE = DRONE_NOISE                    # Default maximum drone noise
-        # TODO: treat 'destination' as a list，so the path would be locations in 'destination'
-        self.destination = None                     # Next destination
+        self.drone_id = drone_id  # Drone id
+        self.warehouses = warehouses  # Locations of all warehouses
+        self.location = start_location  # Location of the drone
+        self.height = height  # TODO: Height of the drone
+        self.order = None  # Current order
+        self.status = DroneStatus.WAITING  # Drone's status, initially waiting
+        self.NOISE = DRONE_NOISE  # Default maximum drone noise
+        self.destination = None  # Next destination
+        self.need_planning = True  # Whether the drone needs path planner to plan a path
+        self.path = []  # A planned path (list of coordinate)
+        self.tracker = Tracker()  # Tracker tracks drone steps and moving distance
     
     def accept_order(self, order: Order):
         """
@@ -38,7 +37,6 @@ class Drone:
         self.order.accept()
         self.status = DroneStatus.COLLECTING
         self.destination = self.order.start_location
-        self.update_speed()
         if PRINT_TERMINAL:
             print(f"[{datetime.now()}] Drone '{self.drone_id}' accepted Order '{self.order.order_id}'")
             print(f"[{datetime.now()}] Drone '{self.drone_id}' is flying to {self.destination} to pick up food")
@@ -54,7 +52,6 @@ class Drone:
         self.order.deliver()
         self.status = DroneStatus.DELIVERING
         self.destination = self.order.end_location
-        self.update_speed()
         if PRINT_TERMINAL:
             print(f"[{datetime.now()}] Drone '{self.drone_id}' collected Order '{self.order.order_id}'")
             print(f"[{datetime.now()}] Drone '{self.drone_id}' is flying to {self.destination} to deliver food")
@@ -71,7 +68,6 @@ class Drone:
         self.order.complete()
         self.status = DroneStatus.RETURNING
         self.destination = nearest_neighbor(neighbors=self.warehouses, target=self.location)
-        self.update_speed()
         if PRINT_TERMINAL:
             print(f"[{datetime.now()}] Drone '{self.drone_id}' delivered Order '{self.order.order_id}'")
             print(f"[{datetime.now()}] Drone '{self.drone_id}' is flying to {self.destination} to recharge")
@@ -87,55 +83,82 @@ class Drone:
         self.status = DroneStatus.WAITING
         self.order = None
         self.destination = None
-        self.lo_speed = 0
-        self.la_speed = 0
+        self.tracker.record()
         if PRINT_TERMINAL:
             print(f"[{datetime.now()}] Drone '{self.drone_id}' returned to the nearest warehouse and start to recharge")
             print(f"[{datetime.now()}] Drone '{self.drone_id}' is recharging and waiting for new orders")
     
     def update(self):
-        """Update drone's position and status based on its current status"""
-        if self.location.latitude > MAP_TOP or self.location.latitude < MAP_BOTTOM \
-            or self.location.longitude > MAP_RIGHT or self.location.longitude < MAP_LEFT:
-            print(f"{self} is out of boundary")
-        if self.status is DroneStatus.COLLECTING:
-            if self.fly() is True:
-                self.collect_food()
-        elif self.status is DroneStatus.DELIVERING:
-            if self.fly() is True:
-                self.give_food()
-        elif self.status is DroneStatus.RETURNING:
-            if self.fly() is True:
-                self.recharge()
-        else:
-            # Current status is DroneStatus.WAITING
-            if PRINT_TERMINAL:
-                print(f"[{datetime.now()}] Drone '{self.drone_id}' is waiting for new orders")
-    
-    def fly(self) -> bool:
         """
-        Fly to the current destination
+        Update drone's position and status based on its current status.
         
-        If the drone reaches the destination after this update, return True; otherwise return False
+        Drone's status will change: COLLECTING -> DELIVERING -> RETURNING -> WAITING
         """
-        la_delta, lo_delta = self.destination - self.location
-        if math.fabs(la_delta) <= math.fabs(self.la_speed) or math.fabs(lo_delta) <= math.fabs(self.lo_speed):
-            self.location.latitude = self.destination.latitude
-            self.location.longitude = self.destination.longitude
+        if self.out_of_map():
+            # if the drone is out of the map, print an error message
+            # and send it to the nearest warehouse
+            if PRINT_TERMINAL:
+                print(f"ERROR: {self} is out of boundary, {self.order} is failed to be delivered, "
+                      f"{self} has been sent to the nearest warehouse")
+            self.order = None
+            self.destination = None
+            self.status = DroneStatus.WAITING
+            self.location = nearest_neighbor(neighbors=self.warehouses, target=self.location)
+        else:
+            if self.has_path():
+                self.fly_path()
+                if self.reach_destination():
+                    self.need_planning = True
+                    if self.status is DroneStatus.COLLECTING:
+                        self.collect_food()
+                    elif self.status is DroneStatus.DELIVERING:
+                        self.give_food()
+                    elif self.status is DroneStatus.RETURNING:
+                        self.recharge()
+            else:
+                if PRINT_TERMINAL:
+                    print(f"WARNING: {self} has no path")
+    
+    def receive_path(self, path):
+        """
+        Receive a path.
+        
+        :param path: a path planned by 'PathPlanner'
+        """
+        self.path = path
+        self.need_planning = False
+    
+    def fly_path(self):
+        """
+        Fly to the next coordinate on the path. While flying, use tracker to track step and distance.
+        """
+        next_location = self.path.pop(0)
+        _, _, d = distance_coordinates(self.location, next_location)
+        self.location = next_location
+        self.tracker.increment_distance(d)
+        self.tracker.increment_step()
+    
+    def out_of_map(self):
+        """
+        Check if the drone is within the boundary of the map
+        """
+        if self.location.latitude > MAP_TOP or self.location.latitude < MAP_BOTTOM \
+                or self.location.longitude > MAP_RIGHT or self.location.longitude < MAP_LEFT:
             return True
         else:
-            self.location.latitude += self.la_speed
-            self.location.longitude += self.lo_speed
             return False
     
-    def update_speed(self):
-        """Update speed according to the current destination"""
-        la_distance, lo_distance, direct_distance = distance(self.location, self.destination)
-        if direct_distance == 0:
-            self.la_speed = self.lo_speed = 0
-        else:
-            self.la_speed = la_distance * self.MAX_SPEED / direct_distance
-            self.lo_speed = lo_distance * self.MAX_SPEED / direct_distance
+    def has_path(self):
+        """
+        Check if the drone has a path.
+        """
+        return len(self.path) > 0
+    
+    def reach_destination(self):
+        """
+        Check if the drone has reached the current destination.
+        """
+        return self.destination is not None and self.location == self.destination
 
 
 if __name__ == '__main__':
