@@ -2,7 +2,7 @@ from cityMap.citymap import Coordinate
 from orders.order import Order
 from commons.decorators import auto_str
 from commons.enum import DroneStatus
-from commons.my_util import distance_coordinates, nearest_neighbor
+from commons.my_util import distance, nearest_neighbor
 from commons.constants import DRONE_NOISE
 from commons.configuration import PRINT_TERMINAL, MAP_TOP, MAP_LEFT, MAP_RIGHT, MAP_BOTTOM
 from datetime import datetime
@@ -131,7 +131,7 @@ class Drone:
     
     def update_speed(self):
         """Update speed according to the current destination"""
-        la_distance, lo_distance, direct_distance = distance_coordinates(self.location, self.destination)
+        la_distance, lo_distance, direct_distance = distance(self.location, self.destination)
         if direct_distance == 0:
             self.la_speed = self.lo_speed = 0
         else:

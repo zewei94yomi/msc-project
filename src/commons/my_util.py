@@ -4,7 +4,9 @@ import numpy as np
 from typing import List
 import random
 from commons.constants import M_2_LATITUDE, M_2_LONGITUDE, DRONE_NOISE
-from commons.configuration import PRIORITIZE, PRIORITIZE_K
+from commons.configuration import PRIORITIZE_K
+from matplotlib import pyplot as plt
+import seaborn as sns
 
 
 def offset_coordinate(coordinate: Coordinate, la_range, lo_range):
@@ -12,20 +14,20 @@ def offset_coordinate(coordinate: Coordinate, la_range, lo_range):
     coordinate.longitude += random.uniform(-lo_range, lo_range)
 
 
-def distance_coordinates(c1: Coordinate, c2: Coordinate):
+def distance(c1: Coordinate, c2: Coordinate):
     """
     Calculate distances between two coordinates
 
     :param c1: current coordinate
     :param c2: another coordinate
     :return:
-        1. la_distance: latitude distance from c1 to c2
-        2. lo_distance: longitude distance from c1 to c2
-        3. line_distance: straight-line distance from c1 to c2
+        1. la_distance: latitude distance from c1 to c2 in latitude
+        2. lo_distance: longitude distance from c1 to c2 in longitude
+        3. meter_distance: straight-line distance from c1 to c2 in meters
     """
     la_distance, lo_distance = c2 - c1
-    line_distance = math.sqrt(math.pow(la_distance, 2) + math.pow(lo_distance, 2))
-    return la_distance, lo_distance, line_distance
+    meter_distance = math.sqrt(math.pow(la_distance / M_2_LATITUDE, 2) + math.pow(lo_distance / M_2_LONGITUDE, 2))
+    return la_distance, lo_distance, meter_distance
 
 
 def straight_distance_matrix(row1, col1, row2, col2):
@@ -67,7 +69,7 @@ def nearest_neighbor_idx(neighbors: List[Coordinate], target: Coordinate) -> int
     """
     distances = []
     for neighbor in neighbors:
-        _, _, line_distance = distance_coordinates(neighbor, target)
+        _, _, line_distance = distance(neighbor, target)
         distances.append(line_distance)
     return np.argmin(distances)
 
@@ -154,9 +156,7 @@ def cost(row1, col1, row2, col2, avg_matrix):
     :return: cost from parent to child
     """
     d = diagonal_distance_matrix(row1, col1, row2, col2)
-    gn = d * DRONE_NOISE
-    if PRIORITIZE:
-        gn += PRIORITIZE_K * avg_matrix[row2][col2]
+    gn = d * DRONE_NOISE + PRIORITIZE_K * avg_matrix[row2][col2]
     return gn
 
 
@@ -204,3 +204,20 @@ def find_node(row, col, open_nodes: List):
         return open_nodes[idx]
     else:
         return None
+
+
+def plot_pcolormesh(X, Y, Z, title, path):
+    fig, ax = plt.subplots()
+    plt.pcolormesh(X, Y, Z)
+    plt.colorbar()
+    plt.title(title)
+    plt.savefig(path, bbox_inches='tight')
+    plt.close()
+    
+
+def plot_histogram(data, title, path):
+    fig, ax = plt.subplots()
+    sns.histplot(data=data, kde=True)
+    plt.title(title)
+    plt.savefig(path, bbox_inches='tight')
+    plt.close()

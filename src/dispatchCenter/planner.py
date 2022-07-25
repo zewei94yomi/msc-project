@@ -51,7 +51,7 @@ class PathPlanner:
                     if (child.row, child.col) in close_nodes:
                         # this child has already been reached
                         continue
-                    child_gn = cost(current.row, current.col, child.row, child.col, avg_matrix)
+                    child_gn = current.gn + cost(current.row, current.col, child.row, child.col, avg_matrix)
                     child_hn = heuristic(child.row, child.col, last_cell.row, last_cell.col, DRONE_NOISE)
                     res_node = find_node(child.row, child.col, open_nodes)
                     if res_node is not None:

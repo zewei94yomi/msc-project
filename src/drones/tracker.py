@@ -10,6 +10,9 @@ class Tracker:
         self.end_step = []
         self.end_distance = []
         
+    def total_orders(self):
+        return len(self.end_step)
+        
     def increment_step(self):
         self.step += 1
         

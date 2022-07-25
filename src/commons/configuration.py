@@ -1,25 +1,26 @@
 # Print on the terminal
 PRINT_TERMINAL = True
 # Plot the simulation
-PLOT_SIMULATION = True
+PLOT_SIMULATION = False
 # Use DensityMatrix to track noise: tracking noise in matrix
 USE_DENSITY_MATRIX = True
 # Use local order data; otherwise generate new orders
 USE_LOCAL_ORDER = True
 # Prioritize to low-average-noise cells, i.e. prioritize fairness
-PRIORITIZE = False
-PRIORITIZE_K = 40
+PRIORITIZE_K = 5000000
 # Use NoiseTracker to track noise (DEPRECATED: default to be False)
 USE_NOISE_TRACKER = False
 # Save noise trajectory data to local in csv; need to use NoiseTracker
 SAVE_CSV = True
 
 # Coordinates of warehouses
-WAREHOUSES = [[37.751800, -122.478555], [37.72, -122.428], [37.78, -122.39]]
+WAREHOUSES = [[37.805858377440266, -122.41276123169143],
+              [37.76077744044274, -122.390011845567],
+              [37.7426674419608, -122.39981393102507]]
 # Total number of orders
-ORDERS = 4
+ORDERS = 400
 # Total number of drones
-DRONES = 2
+DRONES = 50
 
 # Noise matrix cell size (in meter)
 NOISE_CELL_LENGTH = 100
@@ -57,6 +58,10 @@ PD_PATH = 'recourses/data/population/shown_tract_popdensity2010.csv'
 BACKGROUND_IMAGE_PATH = 'recourses/images/map.jpeg'
 # Base path for saving noise density matrix
 MATRIX_BASE_PATH = 'recourses/results/noise/matrix'
+# Base path for saving noise histogram
+HISTOGRAM_BASE_PATH = 'recourses/results/noise/histogram'
+# Base path for experiment results
+RESULT_BASE_PATH = 'recourses/results/experiments'
 
 # Map
 CRS = 'epsg:3857'

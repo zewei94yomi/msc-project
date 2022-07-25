@@ -2,7 +2,7 @@ from cityMap.citymap import Coordinate
 from orders.order import Order
 from commons.decorators import auto_str
 from commons.enum import DroneStatus
-from commons.my_util import nearest_neighbor, distance_coordinates
+from commons.my_util import nearest_neighbor, distance
 from commons.constants import DRONE_NOISE
 from commons.configuration import PRINT_TERMINAL, MAP_TOP, MAP_LEFT, MAP_RIGHT, MAP_BOTTOM
 from datetime import datetime
@@ -133,7 +133,7 @@ class Drone:
         Fly to the next coordinate on the path. While flying, use tracker to track step and distance.
         """
         next_location = self.path.pop(0)
-        _, _, d = distance_coordinates(self.location, next_location)
+        _, _, d = distance(self.location, next_location)
         self.location = next_location
         self.tracker.increment_distance(d)
         self.tracker.increment_step()

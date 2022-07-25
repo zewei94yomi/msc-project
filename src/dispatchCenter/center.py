@@ -2,7 +2,11 @@ from commons.decorators import auto_str
 from commons.enum import DroneStatus
 from commons.my_util import nearest_free_drone, difference
 from commons.util import Queue
-from commons.configuration import CENTER_PER_SLICE_TIME, PLOT_SIMULATION, USE_NOISE_TRACKER, USE_DENSITY_MATRIX, USE_LOCAL_ORDER
+from commons.configuration import CENTER_PER_SLICE_TIME, PLOT_SIMULATION
+from commons.configuration import USE_NOISE_TRACKER, USE_DENSITY_MATRIX, USE_LOCAL_ORDER
+from commons.configuration import ORDERS, DRONES, NOISE_CELL_WIDTH, NOISE_CELL_LENGTH, PRIORITIZE_K
+from commons.configuration import RESULT_BASE_PATH
+from commons.configuration import MAP_LEFT, MAP_TOP, MAP_RIGHT, MAP_BOTTOM
 from cityMap.citymap import Coordinate, CityMap
 from drones.dronegenerator import DroneGenerator
 from orders.ordergenerator import OrderGenerator
@@ -11,6 +15,9 @@ from dispatchCenter.planner import PathPlanner
 from noise.tracker import NoiseTracker
 from noise.matrix import DensityMatrix
 import time
+import os
+from datetime import datetime
+import csv
 
 
 @auto_str
@@ -97,18 +104,84 @@ class Center:
                     if USE_DENSITY_MATRIX:
                         self.matrix.track_noise(self.delivering_drones)
                     if PLOT_SIMULATION:
-                        self.plotter.store_plot(self.delivering_drones)
+                        self.plotter.plot(self.delivering_drones)
                 if self.has_waiting_order() is False and \
                         self.has_working_drone() is False and \
                         self.has_planning_drone() is False:
                     print("All orders have been completed, no more new orders")
                     if USE_DENSITY_MATRIX:
-                        print("Plotting noise density matrix...")
-                        self.matrix.plot_matrix(time_count=self.iteration_count)
-                        print("Noise density matrix has been saved to local")
-                    print("Simulation ends: ending running the center...")
+                        print("Saving results to the local")
+                        self.save()
+                        print("Done saving results")
+                    print("Simulation ends: shutting down the center...")
                     break
     
+    def save(self):
+        t = datetime.now().strftime("%m-%d_%H:%M:%S")
+        path = RESULT_BASE_PATH + '/' + t
+        if not os.path.exists(path):
+            os.makedirs(path)
+            
+        # drone data
+        drone_path = path + '/drone.csv'
+        drone_fields = ['Drone ID', 'Total Step', 'Total Distance', 'Total Orders']
+        drone_data = []
+        for drone in self.free_drones:
+            drone_data.append([drone.drone_id,
+                               drone.tracker.total_step(),
+                               drone.tracker.total_distance(),
+                               drone.tracker.total_orders()])
+        with open(drone_path, 'w') as f:
+            write = csv.writer(f)
+            write.writerow(drone_fields)
+            write.writerows(drone_data)
+            print(f'Done writing drones data!')
+            f.flush()
+            f.close()
+        
+        # density matrix noise data
+        matrix_path = path + '/matrix.csv'
+        matrix_fields = ['Row',
+                         'Col',
+                         'Average Noise',
+                         'Maximum Noise',
+                         'Time']
+        matrix_data = []
+        for i in range(self.matrix.rows):
+            for j in range(self.matrix.cols):
+                matrix_data.append([i,
+                                    j,
+                                    self.matrix.matrix[i][j].total_noise / self.iteration_count,
+                                    self.matrix.matrix[i][j].max_noise,
+                                    self.iteration_count])
+        with open(matrix_path, 'w') as f:
+            write = csv.writer(f)
+            write.writerow(matrix_fields)
+            write.writerows(matrix_data)
+            print(f'Done writing noise density matrix data!')
+            f.flush()
+            f.close()
+        
+        # configuration
+        config_path = path + '/config.csv'
+        config_fields = ['Left Longitude', 'Right Longitude', 'Top Latitude', 'Bottom Latitude',
+                         'Orders', 'Drones',
+                         'Cell Length', 'Cell Width',
+                         'Rows', 'Cols',
+                         'Prioritization K']
+        config = [[MAP_LEFT, MAP_RIGHT, MAP_TOP, MAP_BOTTOM,
+                   ORDERS, DRONES,
+                   NOISE_CELL_LENGTH, NOISE_CELL_WIDTH,
+                   self.matrix.rows, self.matrix.cols,
+                   PRIORITIZE_K]]
+        with open(config_path, 'w') as f:
+            write = csv.writer(f)
+            write.writerow(config_fields)
+            write.writerows(config)
+            print(f'Done writing configuration data!')
+            f.flush()
+            f.close()
+        
     def init_drones(self, num):
         """
         Create a number of drones and add them to the list of free drones

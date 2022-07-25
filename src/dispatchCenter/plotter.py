@@ -27,7 +27,7 @@ class Plotter:
         plt.ylim(self.mapBottom, self.mapTop)
         plt.ion()
         
-    def store_plot(self, drones: List[Drone]):
+    def plot(self, drones: List[Drone]):
         """
         Store locations of drones and orders and plot them on the map.
         
