@@ -1,11 +1,16 @@
 from commons.decorators import auto_str
+from commons.configuration import USE_POPULATION_DENSITY
 from commons.configuration import NOISE_CELL_LENGTH, NOISE_CELL_WIDTH
 from commons.configuration import MAP_LEFT, MAP_RIGHT, MAP_TOP, MAP_BOTTOM
+from commons.configuration import GEO_PATH, PD_PATH
 from commons.constants import M_2_LONGITUDE, M_2_LATITUDE
 from commons.my_util import multi_source_sound_level, distance, calculate_noise_coord
 from cityMap.citymap import Coordinate
 import math
 import numpy as np
+import pandas as pd
+import geopandas as gpd
+from shapely.geometry import Point
 
 
 @auto_str
@@ -16,6 +21,7 @@ class Cell:
         self.centroid = Coordinate(latitude, longitude)
         self.total_noise = 0
         self.max_noise = 0
+        self.population_density = 1
     
     def receive_noise(self, noise):
         """
@@ -45,6 +51,25 @@ class DensityMatrix:
                              longitude=self.left + (j + 1 / 2) * self.cell_length_lo,
                              row=i, col=j)
                         for j in range(self.cols)] for i in range(self.rows)]
+        if USE_POPULATION_DENSITY:
+            self.load_pd()
+
+    def load_pd(self):
+        print("Loading population density data to the matrix...")
+        geo = gpd.read_file(GEO_PATH)
+        pd_data = pd.read_csv(PD_PATH)
+        # TODO: normalize population density first
+        geo_pd_merged = geo.merge(pd_data, left_on="id2", right_on="tract")
+        polys_geometry = geo_pd_merged.explode(index_parts=True, column='geometry')
+        for i in range(self.rows):
+            for j in range(self.cols):
+                cell = self.matrix[i][j]
+                centroid = cell.centroid
+                p = Point(centroid.longitude, centroid.latitude)
+                for _, line in polys_geometry.iterrows():
+                    if line['geometry'].contains(p):
+                        cell.population_density = line['Population_Density_in_2010']
+                        break
 
     def is_valid(self, longitude, latitude):
         if longitude >= self.right or longitude < self.left:
@@ -59,6 +84,10 @@ class DensityMatrix:
     
     def get_maximum_matrix(self):
         return np.array([[self.matrix[i][j].max_noise for j in range(self.cols)]
+                         for i in range(self.rows)])
+    
+    def get_pd_matrix(self):
+        return np.array([[self.matrix[i][j].population_density for j in range(self.cols)]
                          for i in range(self.rows)])
     
     def get_cell(self, coordinate: Coordinate):

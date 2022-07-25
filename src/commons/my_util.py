@@ -153,6 +153,7 @@ def cost(row1, col1, row2, col2, avg_matrix):
     :param row2: child node row
     :param col2: child node col
     :param avg_matrix: average-noise matrix
+    :param pd_matrix: population density matrix
     :return: cost from parent to child
     """
     d = diagonal_distance_matrix(row1, col1, row2, col2)

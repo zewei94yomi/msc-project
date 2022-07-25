@@ -1,15 +1,17 @@
 # Print on the terminal
 PRINT_TERMINAL = True
 # Plot the simulation
-PLOT_SIMULATION = False
+PLOT_SIMULATION = True
 # Use DensityMatrix to track noise: tracking noise in matrix
 USE_DENSITY_MATRIX = True
 # Use local order data; otherwise generate new orders
 USE_LOCAL_ORDER = True
 # Prioritize to low-average-noise cells, i.e. prioritize fairness
-PRIORITIZE_K = 5000000
+PRIORITIZE_K = 50
 # Use NoiseTracker to track noise (DEPRECATED: default to be False)
 USE_NOISE_TRACKER = False
+# Consider population density in A* search
+USE_POPULATION_DENSITY = False
 # Save noise trajectory data to local in csv; need to use NoiseTracker
 SAVE_CSV = True
 
@@ -18,9 +20,9 @@ WAREHOUSES = [[37.805858377440266, -122.41276123169143],
               [37.76077744044274, -122.390011845567],
               [37.7426674419608, -122.39981393102507]]
 # Total number of orders
-ORDERS = 400
+ORDERS = 30
 # Total number of drones
-DRONES = 50
+DRONES = 10
 
 # Noise matrix cell size (in meter)
 NOISE_CELL_LENGTH = 100
