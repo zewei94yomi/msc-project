@@ -19,7 +19,7 @@ class Drone:
         self.height = height  # TODO: Height of the drone
         self.order = None  # Current order
         self.status = DroneStatus.WAITING  # Drone's status, initially waiting
-        self.NOISE = DRONE_NOISE  # Default maximum drone noise
+        self.NOISE = DRONE_NOISE  # Default maximum drone matrix
         self.destination = None  # Next destination
         self.need_planning = True  # Whether the drone needs path planner to plan a path
         self.path = []  # A planned path (list of coordinate)
@@ -159,8 +159,3 @@ class Drone:
         Check if the drone has reached the current destination.
         """
         return self.destination is not None and self.location == self.destination
-
-
-if __name__ == '__main__':
-    print("DO NOT TEST HERE...")
-    print("Test Drone Using DroneGenerator...")

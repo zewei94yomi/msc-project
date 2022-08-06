@@ -3,7 +3,7 @@ from commons.enum import DroneStatus
 from commons.my_util import nearest_free_drone, difference
 from commons.util import Queue
 from commons.configuration import CENTER_PER_SLICE_TIME, PLOT_SIMULATION
-from commons.configuration import USE_NOISE_TRACKER, USE_DENSITY_MATRIX, USE_LOCAL_ORDER
+from commons.configuration import USE_DENSITY_MATRIX, USE_LOCAL_ORDER
 from commons.configuration import ORDERS, DRONES, NOISE_CELL_WIDTH, NOISE_CELL_LENGTH, PRIORITIZE_K
 from commons.configuration import RESULT_BASE_PATH
 from commons.configuration import MAP_LEFT, MAP_TOP, MAP_RIGHT, MAP_BOTTOM
@@ -12,8 +12,7 @@ from drones.dronegenerator import DroneGenerator
 from orders.ordergenerator import OrderGenerator
 from dispatchCenter.plotter import Plotter
 from dispatchCenter.planner import PathPlanner
-from noise.tracker import NoiseTracker
-from noise.matrix import DensityMatrix
+from matrix.noise import DensityMatrix
 import time
 import os
 from datetime import datetime
@@ -35,8 +34,6 @@ class Center:
         self.init_orders(num_orders)
         self.matrix = DensityMatrix()
         self.planner = PathPlanner(self.matrix)
-        if USE_NOISE_TRACKER:
-            self.noise_tracker = NoiseTracker()
         if PLOT_SIMULATION:
             self.plotter = Plotter(warehouses=self.warehouses, city_map=city_map)
     
@@ -78,20 +75,16 @@ class Center:
         """
         for drone in self.delivering_drones:
             drone.update()
-            if USE_NOISE_TRACKER:
-                self.noise_tracker.track_noise(drone)
             if drone.status is DroneStatus.WAITING:
                 self.free_drones.append(drone)
         self.delivering_drones = [x for x in self.delivering_drones if x not in self.free_drones]
-        if USE_NOISE_TRACKER:
-            self.noise_tracker.update_time_count()
         self.waiting_planning_drones.extend([x for x in self.delivering_drones if x.need_planning is True])
     
     def run(self):
         """
         Start running the center
         """
-        print("Simulation starts: running the center...")
+        print("Simulation starts, running the center...")
         origin_time = time.time()
         while True:
             next_iteration_time = origin_time + self.iteration_count * CENTER_PER_SLICE_TIME
@@ -113,7 +106,7 @@ class Center:
                         print("Saving results to the local")
                         self.save()
                         print("Done saving results")
-                    print("Simulation ends: shutting down the center...")
+                    print("Simulation ends, shutting down the center...")
                     break
     
     def save(self):
@@ -139,7 +132,7 @@ class Center:
             f.flush()
             f.close()
         
-        # density matrix noise data
+        # density matrix matrix data
         matrix_path = path + '/matrix.csv'
         matrix_fields = ['Row',
                          'Col',
@@ -158,7 +151,7 @@ class Center:
             write = csv.writer(f)
             write.writerow(matrix_fields)
             write.writerows(matrix_data)
-            print(f'Done writing noise density matrix data!')
+            print(f'Done writing matrix density matrix data!')
             f.flush()
             f.close()
         
@@ -194,10 +187,7 @@ class Center:
         Create a number of orders and add them to the queue of waiting orders
         """
         print("Start initializing orders...")
-        if USE_LOCAL_ORDER:
-            orders = self.order_generator.load_orders()
-        else:
-            orders = self.order_generator.get_orders(num=num, bias=True)
+        orders = self.order_generator.get_orders(num=num, bias=True)
         for order in orders:
             self.waiting_orders.push(order)
     

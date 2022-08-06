@@ -33,11 +33,3 @@ class DroneGenerator:
             self.warehouse_pointer = (self.warehouse_pointer + 1) % len(self.warehouses)
             drones.append(drone)
         return drones
-        
-
-if __name__ == '__main__':
-    w = [Coordinate(latitude=22, longitude=123)]
-    dg = DroneGenerator(warehouses=w)
-    print(dg)
-    d = dg.get_drone()
-    print(d)

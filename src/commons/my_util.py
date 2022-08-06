@@ -107,24 +107,24 @@ def nearest_free_drone(order, free_drones):
 
 def calculate_noise_m(x_dist, y_dist, central_noise):
     """
-    Calculate the noise at distance.
+    Calculate the matrix at distance.
     
     :param x_dist: x-axis distance to center x in meters
     :param y_dist: y-axis distance to center y
-    :param central_noise: the center noise level
-    :return: the noise at (center_x + x_dist, center_y + y_dist)
+    :param central_noise: the center matrix level
+    :return: the matrix at (center_x + x_dist, center_y + y_dist)
     """
     return central_noise - math.fabs(10 * math.log10(math.pow(x_dist, 2) + math.pow(y_dist, 2)))
 
 
 def calculate_noise_coord(x_dist, y_dist, central_noise):
     """
-    Calculate the noise at distance.
+    Calculate the matrix at distance.
 
     :param x_dist: x-axis distance to center x in longitude
     :param y_dist: y-axis distance to center y in latitude
-    :param central_noise: the center noise level
-    :return: the noise at (center_x + x_dist, center_y + y_dist)
+    :param central_noise: the center matrix level
+    :return: the matrix at (center_x + x_dist, center_y + y_dist)
     """
     return central_noise - math.fabs(10 * math.log10(math.pow(x_dist / M_2_LONGITUDE, 2) +
                                                      math.pow(y_dist / M_2_LATITUDE, 2)))
@@ -168,7 +168,7 @@ def cost_1(row1, col1, row2, col2, avg_matrix, priority_K):
     :param col1: parent node col
     :param row2: child node row
     :param col2: child node col
-    :param avg_matrix: average-noise matrix
+    :param avg_matrix: average-matrix matrix
     :param priority_K: priority parameter, K
     :return: cost from parent to child
     """
@@ -185,7 +185,7 @@ def cost_2(row1, col1, row2, col2, avg_matrix, priority_P):
     :param col1: parent node col
     :param row2: child node row
     :param col2: child node col
-    :param avg_matrix: average-noise matrix
+    :param avg_matrix: average-matrix matrix
     :param priority_P: priority parameter, P
     :return: cost from parent to child
     """

@@ -25,9 +25,9 @@ class Cell:
     
     def receive_noise(self, noise):
         """
-        Cell receives a mixed noise and update its total and maximum noise.
+        Cell receives a mixed matrix and update its total and maximum matrix.
         
-        :param noise: a mixed noise
+        :param noise: a mixed matrix
         :return:
         """
         self.total_noise += noise
@@ -53,6 +53,7 @@ class DensityMatrix:
                         for j in range(self.cols)] for i in range(self.rows)]
         if USE_POPULATION_DENSITY:
             self.load_pd()
+            # TODO: how to use population density ...
 
     def load_pd(self):
         print("Loading population density data to the matrix...")
@@ -103,7 +104,7 @@ class DensityMatrix:
     
     def track_noise(self, drones):
         """
-        The matrix tracks all drones' noise and record them to the matrix.
+        The matrix tracks all drones' matrix and record them to the matrix.
         
         :param drones: a list of working drones
         :return:

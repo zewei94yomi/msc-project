@@ -4,7 +4,7 @@ from orders.order import Order
 from faker import Faker
 from datetime import datetime
 from commons.configuration import ORDER_BASE_PATH
-from commons.configuration import ORDERS
+from commons.configuration import USE_LOCAL_ORDER
 import csv
 import pandas as pd
 
@@ -22,10 +22,19 @@ class OrderGenerator:
     
     def get_orders(self, num, start_time=datetime.now(), end_time=datetime.now(), bias=True):
         """
-        Create and initialize Order instances on the given map
+        Initialize Order instances on the given map
 
-        :return: a Order instance
+        :return: a list of Order instances
         """
+        orders = []
+        if USE_LOCAL_ORDER:
+            orders = self.load_orders(num_orders=num)
+        if len(orders) != 0:
+            return orders
+        else:
+            return self.generate_orders(num=num, start_time=start_time, end_time=end_time, bias=bias)
+        
+    def generate_orders(self, num, start_time=datetime.now(), end_time=datetime.now(), bias=True):
         orders = []
         start_coords = self.city_map.get_coord(num=num, bias=bias)  # restaurant
         end_coords = self.city_map.get_coord(num=num, bias=bias)  # customers
@@ -60,14 +69,14 @@ class OrderGenerator:
             f.flush()
             f.close()
     
-    def load_orders(self):
+    def load_orders(self, num_orders):
         print(f'Loading orders data from \'{ORDER_BASE_PATH}\'')
         order_df = pd.read_csv(ORDER_BASE_PATH)
         print(f'Done loading orders data from \'{ORDER_BASE_PATH}\'')
         orders = []
         print(f'Initializing orders from local data...')
         for i, line in order_df.iterrows():
-            if i >= ORDERS:
+            if i >= num_orders:
                 break
             order = Order(order_id=line['Order ID'],
                           start_location=Coordinate(line['Start Latitude'], line['Start Longitude']),

@@ -1,8 +1,9 @@
-from noise.matrix import DensityMatrix
+from matrix.noise import DensityMatrix
 from cityMap.citymap import Coordinate
 from commons.decorators import auto_str
-from commons.my_util import heuristic, cost, pop_lowest_priority, find_node, backtrack
+from commons.my_util import heuristic, cost_1, cost_2, pop_lowest_priority, find_node, backtrack
 from commons.constants import DRONE_NOISE
+from commons.configuration import COST_FUNCTION, PRIORITIZE_P, PRIORITIZE_K
 
 
 @auto_str
@@ -52,7 +53,11 @@ class PathPlanner:
                         # this child has already been reached
                         continue
                     # TODO: consider population density
-                    child_gn = current.gn + cost(current.row, current.col, child.row, child.col, avg_matrix)
+                    if COST_FUNCTION is 'first':
+                        cost = cost_1(current.row, current.col, child.row, child.col, avg_matrix, PRIORITIZE_K)
+                    else:
+                        cost = cost_2(current.row, current.col, child.row, child.col, avg_matrix, PRIORITIZE_P)
+                    child_gn = current.gn + cost
                     child_hn = heuristic(child.row, child.col, last_cell.row, last_cell.col, DRONE_NOISE)
                     res_node = find_node(child.row, child.col, open_nodes)
                     if res_node is not None:
@@ -84,8 +89,3 @@ class PathPlanner:
                 if 0 <= new_row < self.matrix.rows and 0 <= new_col < self.matrix.cols:
                     children.append(Node(new_row, new_col, old_node, 0, 0))
         return children
-
-
-if __name__ == '__main__':
-    pp = PathPlanner(DensityMatrix())
-    print("")
