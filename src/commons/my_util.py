@@ -4,12 +4,19 @@ import numpy as np
 from typing import List
 import random
 from commons.constants import M_2_LATITUDE, M_2_LONGITUDE, DRONE_NOISE
-from commons.configuration import PRIORITIZE_K
 from matplotlib import pyplot as plt
 import seaborn as sns
 
 
 def offset_coordinate(coordinate: Coordinate, la_range, lo_range):
+    """
+    Add offset to a coordinate.
+    
+    :param coordinate:
+    :param la_range: latitude offset range (0, la_range)
+    :param lo_range: longitude offset range (0, lo_range)
+    :return: An offset coordinate
+    """
     coordinate.latitude += random.uniform(-la_range, la_range)
     coordinate.longitude += random.uniform(-lo_range, lo_range)
 
@@ -139,36 +146,62 @@ def multi_source_sound_level(sources):
 
 
 def heuristic(row1, col1, row2, col2, step_cost):
-    """Heuristic function"""
+    """
+    Heuristic function calculates heuristic cost from (row1, col1) to (row2, col2) with a given step cost.
+    
+    :param row1: row index of node1
+    :param col1: column index of node1
+    :param row2: row index of node2
+    :param col2: column index of node2
+    :param step_cost: movement cost
+    :return: heuristic cost
+    """
     d = straight_distance_matrix(row1, col1, row2, col2)
     return step_cost * d
 
 
-def cost(row1, col1, row2, col2, avg_matrix):
+def cost_1(row1, col1, row2, col2, avg_matrix, priority_K):
     """
-    Calculate the cost from parent node to child node.
+    Calculate the expansion cost from parent node to child node.
     
     :param row1: parent node row
     :param col1: parent node col
     :param row2: child node row
     :param col2: child node col
     :param avg_matrix: average-noise matrix
-    :param pd_matrix: population density matrix
+    :param priority_K: priority parameter, K
     :return: cost from parent to child
     """
     d = diagonal_distance_matrix(row1, col1, row2, col2)
-    gn = d * DRONE_NOISE + PRIORITIZE_K * avg_matrix[row2][col2]
-    return gn
+    expand_cost = d * DRONE_NOISE + priority_K * avg_matrix[row2][col2]
+    return expand_cost
+
+
+def cost_2(row1, col1, row2, col2, avg_matrix, priority_P):
+    """
+    Calculate the expansion cost from parent node to child node.
+
+    :param row1: parent node row
+    :param col1: parent node col
+    :param row2: child node row
+    :param col2: child node col
+    :param avg_matrix: average-noise matrix
+    :param priority_P: priority parameter, P
+    :return: cost from parent to child
+    """
+    d = diagonal_distance_matrix(row1, col1, row2, col2)
+    expand_cost = d * DRONE_NOISE + math.pow(avg_matrix[row2][col2], priority_P)
+    return expand_cost
 
 
 def backtrack(row0, col0, current):
     """
     Find the path from the current node to the start node.
     
-    :param row0:
-    :param col0:
-    :param current:
-    :return:
+    :param row0: row index of the initial node
+    :param col0: column index of the initial node
+    :param current: current node
+    :return: a path, i.e., a list of nodes
     """
     grid_path = []
     row, col = current.row, current.col
@@ -185,6 +218,12 @@ def backtrack(row0, col0, current):
 
 
 def pop_lowest_priority(open_nodes: List):
+    """
+    Pop the node with the lowest priority.
+    
+    :param open_nodes: a list of nodes
+    :return: A node with the lowest priority in the list
+    """
     min_priority = float('inf')
     min_index = 0
     for i in range(len(open_nodes)):
@@ -196,6 +235,14 @@ def pop_lowest_priority(open_nodes: List):
 
 
 def find_node(row, col, open_nodes: List):
+    """
+    Find a node in a 2d array.
+    
+    :param row: row index
+    :param col: column index
+    :param open_nodes: 2d array
+    :return: open_nodes[row][col]
+    """
     idx = -1
     for i in range(len(open_nodes)):
         if open_nodes[i].row == row and open_nodes[i].col == col:
@@ -207,18 +254,42 @@ def find_node(row, col, open_nodes: List):
         return None
 
 
-def plot_pcolormesh(X, Y, Z, title, path):
+def plot_matrix(X, Y, Z, title, path, color_min, color_max):
+    """
+    Plot a density matrix.
+    
+    :param X: X-axis in pcolormesh
+    :param Y: Y-axis in pcolormesh
+    :param Z: Z-axis (data) in pcolormesh
+    :param title: figure title
+    :param path: figure saving path
+    :param color_min: min value of color bar
+    :param color_max: max value of color bar
+    :return:
+    """
     fig, ax = plt.subplots()
     plt.pcolormesh(X, Y, Z)
     plt.colorbar()
+    plt.clim(vmin=color_min, vmax=color_max)
     plt.title(title)
     plt.savefig(path, bbox_inches='tight')
     plt.close()
     
 
-def plot_histogram(data, title, path):
+def plot_histogram(data, title, path, y_bottom, y_top):
+    """
+    Plot a histogram.
+    
+    :param data: histogram data (from a pandas dataframe)
+    :param title: figure title
+    :param path: figure saving path
+    :param y_bottom: bottom bar value
+    :param y_top: top bar value
+    :return:
+    """
     fig, ax = plt.subplots()
-    sns.histplot(data=data, kde=True)
+    plt.ylim(y_bottom, y_top)
     plt.title(title)
+    sns.histplot(data=data, kde=True)
     plt.savefig(path, bbox_inches='tight')
     plt.close()
