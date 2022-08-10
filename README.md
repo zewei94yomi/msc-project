@@ -17,6 +17,4 @@ There is similar simulation software written in Julia: https://github.com/sisl/M
 
 # Simulation
 
-![Simulation](https://cdn.jsdelivr.net/gh/zewei94yomi/ImageLoader@master/uPic/Simulation.png)
-
-[comment]: <> (![simulation]&#40;https://cdn.jsdelivr.net/gh/zewei94yomi/ImageLoader@master/uPic/simulation.gif&#41;)
+![Simulation](https://github.com/zewei94yomi/msc-project/blob/master/src/recourses/images/delivery.gif)
