@@ -16,4 +16,7 @@ There is similar simulation software written in Julia: https://github.com/sisl/M
 3. Run the application in `src/application.py`
 
 # Simulation
+
 ![Simulation](https://cdn.jsdelivr.net/gh/zewei94yomi/ImageLoader@master/uPic/Simulation.png)
+
+[comment]: <> (![simulation]&#40;https://cdn.jsdelivr.net/gh/zewei94yomi/ImageLoader@master/uPic/simulation.gif&#41;)

@@ -14,16 +14,16 @@ USE_POPULATION_DENSITY = False
 # Use the first or second cost function: 'first' - K; 'second' - P
 COST_FUNCTION = 'second'
 PRIORITIZE_K = 0
-PRIORITIZE_P = 1
+PRIORITIZE_P = 5
 
 # Coordinates of warehouses
 WAREHOUSES = [[37.805858377440266, -122.41276123169143],
               [37.76077744044274, -122.390011845567],
               [37.7426674419608, -122.39981393102507]]
 # Total number of orders (5000 predefined orders)
-ORDERS = 4
+ORDERS = 400
 # Total number of drones
-DRONES = 2
+DRONES = 50
 # Noise matrix cell size (in meter)
 NOISE_CELL_LENGTH = 100
 NOISE_CELL_WIDTH = 100
